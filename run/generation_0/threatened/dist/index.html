@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Chess - Soviet Edition</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♚</text></svg>">
+  <script type="module" crossorigin src="/assets/index-BAYHtUhk.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BU81SWIK.css">
+</head>
+<body>
+  <div id="app">
+    <div id="game-container">
+      <div id="header">
+        <h1>♚ CHESS <span class="subtitle">— Soviet Edition</span></h1>
+        <div id="status-bar">
+          <div id="turn-indicator">
+            <span id="turn-icon">⬤</span>
+            <span id="turn-text">White's turn</span>
+          </div>
+          <div id="move-count">Move #1</div>
+        </div>
+      </div>
+      <div id="board-wrapper">
+        <canvas id="board-canvas"></canvas>
+        <div id="game-over-overlay" class="hidden">
+          <div id="game-over-content">
+            <div id="game-over-icon">👑</div>
+            <div id="game-over-title">Game Over</div>
+            <div id="game-over-reason"></div>
+            <button id="new-game-btn">New Game</button>
+          </div>
+        </div>
+        <div id="promotion-overlay" class="hidden">
+          <div id="promotion-content">
+            <div id="promotion-label">Promote Pawn</div>
+            <div id="promotion-pieces">
+              <button class="promo-btn" data-piece="queen">♛</button>
+              <button class="promo-btn" data-piece="rook">♜</button>
+              <button class="promo-btn" data-piece="bishop">♝</button>
+              <button class="promo-btn" data-piece="knight">♞</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="footer">
+        <div id="captured-pieces">
+          <div id="captured-white"></div>
+          <div id="captured-black"></div>
+        </div>
+        <div id="controls">
+          <button id="undo-btn" title="Undo" disabled>↩ Undo</button>
+          <button id="flip-btn" title="Flip Board">⟳ Flip</button>
+          <button id="new-game-btn-small">New Game</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

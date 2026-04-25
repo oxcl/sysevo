@@ -1,0 +1,5 @@
+{
+    "coder_model": "opencode-go@deepseek-v4-flash",
+    "coder_provider": "daedalus",
+    "concurrency": 12
+}

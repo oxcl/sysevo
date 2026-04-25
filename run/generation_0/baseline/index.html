@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Chess Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .header {
+            text-align: center;
+            color: #e0e0e0;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #FFD700;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+        
+        #chessCanvas {
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            touch-action: none;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .status {
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: 300;
+            padding: 10px 24px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .status.your-turn {
+            border-color: rgba(76, 175, 80, 0.5);
+            color: #81C784;
+        }
+        
+        .status.thinking {
+            border-color: rgba(255, 193, 7, 0.5);
+            color: #FFD54F;
+        }
+        
+        .status.game-over {
+            border-color: rgba(244, 67, 54, 0.5);
+            color: #EF9A9A;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        button.primary:hover {
+            background: linear-gradient(135deg, #7a8eed 0%, #8a5dc2 100%);
+        }
+        
+        .move-history {
+            color: #aaa;
+            font-size: 12px;
+            max-height: 60px;
+            overflow-y: auto;
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            line-height: 1.6;
+        }
+        
+        .move-history::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .move-history::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+        
+        .legal-notice {
+            color: #555;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 8px;
+        }
+        
+        @media (max-width: 500px) {
+            .header h1 {
+                font-size: 20px;
+            }
+            .status {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+            button {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>♚ CHESS ♔</h1>
+            <p>Play against AI (Black)</p>
+        </div>
+        
+        <canvas id="chessCanvas"></canvas>
+        
+        <div id="status" class="status">Starting game...</div>
+        
+        <div class="controls">
+            <button id="newGameBtn" class="primary">New Game</button>
+            <button id="undoBtn">Undo Move</button>
+            <button id="flipBtn">Flip Board</button>
+        </div>
+        
+        <div id="moveHistory" class="move-history"></div>
+        
+        <div class="legal-notice">♙ Chess · AI powered by Minimax with Alpha-Beta Pruning</div>
+    </div>
+    
+    <script src="src/engine.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/game.js"></script>
+    <script>
+        // Initialize the game when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new ChessGame('chessCanvas');
+            
+            // Store globally for debugging
+            window.game = game;
+            
+            // New game button
+            document.getElementById('newGameBtn').addEventListener('click', () => {
+                game.init();
+            });
+            
+            // Undo button (simplified - resets game for now)
+            document.getElementById('undoBtn').addEventListener('click', () => {
+                if (game.moveHistory.length >= 2) {
+                    // Simple undo: reset and replay all moves except last two
+                    const moves = game.moveHistory.map(m => m.move);
+                    const lastTwo = moves.splice(-2);
+                    
+                    game.init();
+                    for (const move of moves) {
+                        game.engine.makeMove(move);
+                    }
+                    game.render();
+                    game.updateStatus();
+                } else {
+                    alert('No moves to undo');
+                }
+            });
+            
+            // Flip board (just a visual placeholder for now)
+            document.getElementById('flipBtn').addEventListener('click', () => {
+                // Could add a flip transform
+            });
+            
+            // Handle canvas click for promotion overlay
+            game.canvas.addEventListener('click', (e) => {
+                if (game.promotionPending && game.promotionAreas) {
+                    const rect = game.canvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) * (game.canvas.width / rect.width);
+                    const y = (e.clientY - rect.top) * (game.canvas.height / rect.height);
+                    
+                    for (const area of game.promotionAreas) {
+                        if (x >= area.x && x <= area.x + area.w &&
+                            y >= area.y && y <= area.y + area.h) {
+                            game.handlePromotion(area.pieceType);
+                            break;
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

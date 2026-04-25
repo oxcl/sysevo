@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Chess</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1a1a2e;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    canvas {
+      display: block;
+      border-radius: 4px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      cursor: pointer;
+      touch-action: none;
+    }
+    #status-bar {
+      color: #e0e0e0;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      height: 28px;
+      line-height: 28px;
+      user-select: none;
+    }
+    #controls {
+      display: flex;
+      gap: 12px;
+    }
+    #controls button {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: #16213e;
+      color: #e0e0e0;
+      transition: background 0.2s;
+    }
+    #controls button:hover {
+      background: #0f3460;
+    }
+    #promotion-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    #promotion-overlay.active {
+      display: flex;
+    }
+    #promotion-dialog {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    #promotion-dialog button {
+      width: 64px;
+      height: 64px;
+      font-size: 40px;
+      border: 2px solid #2a2a4e;
+      border-radius: 8px;
+      background: #16213e;
+      color: #e0e0e0;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #promotion-dialog button:hover {
+      background: #0f3460;
+      transform: scale(1.05);
+    }
+    #promotion-dialog button:active {
+      transform: scale(0.95);
+    }
+    #game-over-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    #game-over-overlay.active {
+      display: flex;
+    }
+    #game-over-dialog {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 32px 40px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    #game-over-dialog h2 {
+      color: #e0e0e0;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    #game-over-dialog p {
+      color: #999;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    #game-over-dialog button {
+      padding: 10px 28px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      background: #0f3460;
+      color: #e0e0e0;
+      transition: background 0.2s;
+    }
+    #game-over-dialog button:hover {
+      background: #1a5276;
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/index-8ygnCxPo.js"></script>
+</head>
+<body>
+  <div id="app">
+    <canvas id="chess-canvas"></canvas>
+    <div id="status-bar">White's turn</div>
+    <div id="controls">
+      <button id="btn-new-game">New Game</button>
+      <button id="btn-flip-board">Flip Board</button>
+    </div>
+  </div>
+
+  <div id="promotion-overlay">
+    <div id="promotion-dialog">
+      <button data-piece="queen">♛</button>
+      <button data-piece="rook">♜</button>
+      <button data-piece="bishop">♝</button>
+      <button data-piece="knight">♞</button>
+    </div>
+  </div>
+
+  <div id="game-over-overlay">
+    <div id="game-over-dialog">
+      <h2 id="game-over-title">Game Over</h2>
+      <p id="game-over-message"></p>
+      <button id="btn-play-again">Play Again</button>
+    </div>
+  </div>
+
+</body>
+</html>

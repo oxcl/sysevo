@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chess - Prototype 1</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.container {
+  text-align: center;
+}
+h1 {
+  color: #e0e0e0;
+  margin-bottom: 20px;
+  font-weight: 300;
+  letter-spacing: 2px;
+}
+canvas {
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+.status {
+  margin-top: 20px;
+  color: #b0b0b0;
+  font-size: 18px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>♚ CHESS</h1>
+  <canvas id="board"></canvas>
+  <div class="status" id="status">White's turn</div>
+</div>
+<script src="chess.js"></script>
+</body>
+</html>

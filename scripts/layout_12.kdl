@@ -1,0 +1,34 @@
+layout {
+  tab name="main" {
+    pane split_direction="vertical" {
+      pane split_direction="horizontal" {
+        pane split_direction="vertical" {
+          pane command="bash" { args "-c" "$CMD0"; }
+          pane command="bash" { args "-c" "$CMD1"; }
+        }
+        pane split_direction="vertical" {
+          pane command="bash" { args "-c" "$CMD2"; }
+          pane command="bash" { args "-c" "$CMD3"; }
+        }
+        pane split_direction="vertical" {
+          pane command="bash" { args "-c" "$CMD4"; }
+          pane command="bash" { args "-c" "$CMD5"; }
+        }
+      }
+      pane split_direction="horizontal" {
+        pane split_direction="vertical" {
+          pane command="bash" { args "-c" "$CMD6"; }
+          pane command="bash" { args "-c" "$CMD7"; }
+        }
+        pane split_direction="vertical" {
+          pane command="bash" { args "-c" "$CMD8"; }
+          pane command="bash" { args "-c" "$CMD9"; }
+        }
+        pane split_direction="vertical" {
+          pane command="bash" { args "-c" "$CMD10"; }
+          pane command="bash" { args "-c" "$CMD11"; }
+        }
+      }
+    }
+  }
+}

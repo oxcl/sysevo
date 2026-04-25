@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chess - Prototypes</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.container {
+  text-align: center;
+}
+h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  letter-spacing: 3px;
+}
+p {
+  color: #888;
+  margin-bottom: 40px;
+}
+.prototypes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+.prototypes a {
+  display: inline-block;
+  padding: 14px 40px;
+  background: linear-gradient(135deg, #b58863, #f0d9b5);
+  color: #1a1a2e;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: 300px;
+}
+.prototypes a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(181,136,99,0.4);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>♚ CHESS</h1>
+  <p>Iterative prototypes</p>
+  <div class="prototypes">
+    <a href="prototype-1/">Prototype 1: Basic board + click-to-move</a>
+  </div>
+</div>
+</body>
+</html>

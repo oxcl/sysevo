@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Chess</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1a1a2e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #game-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #chess-canvas {
+      display: block;
+      border-radius: 4px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+      cursor: pointer;
+      touch-action: none;
+    }
+    #status-bar {
+      position: absolute;
+      bottom: -40px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #e0e0e0;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    #promotion-overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 10;
+      justify-content: center;
+      align-items: center;
+    }
+    #promotion-dialog {
+      background: #2a2a3e;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .promotion-btn {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      background: #3a3a5e;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #fff;
+    }
+    .promotion-btn:hover {
+      background: #4a4a7e;
+      border-color: #888;
+    }
+    .promotion-btn:active {
+      transform: scale(0.95);
+    }
+    #game-info {
+      position: absolute;
+      top: -36px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      color: #b0b0c0;
+      font-size: 14px;
+    }
+    .turn-indicator {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .turn-white {
+      color: #f0f0f0;
+    }
+    .turn-black {
+      color: #888;
+    }
+    .active-turn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/index-CNB0Fcq2.js"></script>
+</head>
+<body>
+  <div id="game-container">
+    <div id="game-info">
+      <span class="turn-indicator turn-white" id="turn-white">White</span>
+      <span id="move-count">Move #1</span>
+      <span class="turn-indicator turn-black" id="turn-black">Black</span>
+    </div>
+    <canvas id="chess-canvas"></canvas>
+    <div id="promotion-overlay">
+      <div id="promotion-dialog"></div>
+    </div>
+    <div id="status-bar"></div>
+  </div>
+</body>
+</html>
