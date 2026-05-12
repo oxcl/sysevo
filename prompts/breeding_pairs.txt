@@ -1,0 +1,28 @@
+# Breeding pairs for generation 0 → generation 1
+# Format: parent_a,parent_b[,child_name]
+#
+# Each line breeds two prompts into a new child prompt.
+# Child names are auto-generated as "parent_axparent_b" if omitted.
+
+# Complementary strategies
+baseline,flamboyent
+tdd,simplicity
+todoist,project-manager
+
+# Personality + motivation
+personality,life-at-stake,stoic-urgency
+flamboyent,prove-yourself,competitive-excellence
+
+# Process-focused
+tdd,clean-after-yourself,tdd-clean
+prototypist,todoist,structured-prototypist
+
+# Philosophy blends
+simplicity,flamboyent,elegant-impact
+personality,simplicity,pragmatic-minimalist
+life-at-stake,tdd,zero-defect-engineer
+
+# Wild cards
+threatened,flamboyent,passionate-under-pressure
+prove-yourself,simplicity,humble-overachiever
+project-manager,life-at-stake,stakes-pm
