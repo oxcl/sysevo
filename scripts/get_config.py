@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 CONFIG_FILE = Path("./config.json")
-REQUIRED_KEYS = ("coder_model", "coder_provider", "concurrency")
+REQUIRED_KEYS = ("model", "concurrency")
 
 
 def load_config(config_path: Path = CONFIG_FILE) -> dict:
@@ -46,8 +46,7 @@ def main():
     config = load_config(args.config)
 
     if args.format == "export":
-        print(f'export CODER_MODEL="{config["coder_model"]}"')
-        print(f'export CODER_PROVIDER="{config["coder_provider"]}"')
+        print(f'export MODEL="{config["model"]}"')
         print(f'export CONCURRENCY="{config["concurrency"]}"')
     elif args.format == "json":
         print(json.dumps(config, indent=2))

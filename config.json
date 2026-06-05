@@ -1,5 +1,4 @@
 {
-    "coder_model": "opencode-go@deepseek-v4-flash",
-    "coder_provider": "daedalus",
+    "model": "openai:gpt-4o",
     "concurrency": 12
 }

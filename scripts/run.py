@@ -1,40 +1,23 @@
 #!/usr/bin/env python3
-"""Run a single agent on a task."""
+"""Run a single agent on a task using LangChain."""
 
-import json
+import argparse
 import shutil
-import subprocess
 import sys
 from pathlib import Path
+
+from agent import create_coding_agent, run_agent, load_config
 
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def load_config() -> dict:
-    config_path = ROOT / "config.json"
-    if not config_path.exists():
-        print(f"Error: Config file {config_path} not found", file=sys.stderr)
-        sys.exit(1)
-
-    with open(config_path) as f:
-        config = json.load(f)
-
-    required = ("coder_model", "coder_provider", "concurrency")
-    for key in required:
-        if key not in config:
-            print(f"Error: Missing required key '{key}' in {config_path}", file=sys.stderr)
-            sys.exit(1)
-
-    return config
-
-
-def run(generation: str, agent: str, task: str):
+def run(generation: str, agent_name: str, task: str):
     # Validate prompt file
-    prompt_file = ROOT / "prompts" / f"generation_{generation}" / f"{agent}.md"
+    prompt_file = ROOT / "prompts" / f"generation_{generation}" / f"{agent_name}.md"
     if not prompt_file.exists():
         print(
-            f"Error: Prompt for '{agent}' in generation {generation} not found. "
+            f"Error: Prompt for '{agent_name}' in generation {generation} not found. "
             f"Cwd: {ROOT}. Prompt file: '{prompt_file}'",
             file=sys.stderr,
         )
@@ -48,43 +31,51 @@ def run(generation: str, agent: str, task: str):
 
     # Load config
     config = load_config()
-    provider = config["coder_provider"]
-    model = config["coder_model"]
+    model = config["model"]
 
     # Clean and create project directory
-    project_dir = ROOT / "run" / f"generation_{generation}" / agent
+    project_dir = ROOT / "run" / f"generation_{generation}" / agent_name
     if project_dir.exists():
         shutil.rmtree(project_dir)
-    (project_dir / ".pi").mkdir(parents=True)
+    project_dir.mkdir(parents=True)
 
-    # Copy prompt and task files
-    shutil.copy2(prompt_file, project_dir / ".pi" / "SYSTEM.md")
+    # Copy task file
     shutil.copy2(task_file, project_dir / "task.md")
 
-    # Run pi CLI
-    cmd = [
-        "pi",
-        "Implement the task",
-        f"@task.md",
-        "--provider", provider,
-        "--model", model,
-    ]
-    result = subprocess.run(cmd, cwd=project_dir)
-    if result.returncode != 0:
-        print(f"Error: pi command failed with exit code {result.returncode}", file=sys.stderr)
-        sys.exit(result.returncode)
+    # Read system prompt and task
+    system_prompt = prompt_file.read_text()
+    task_content = (project_dir / "task.md").read_text()
+
+    # Create agent
+    print(f"[{agent_name}] Creating agent with model={model}...")
+    agent = create_coding_agent(system_prompt, config)
+
+    # Run agent from the project directory
+    import os
+    os.chdir(project_dir)
+
+    user_message = f"Implement the following task. Work in the current directory.\n\n{task_content}"
+    print(f"[{agent_name}] Running agent...")
+
+    try:
+        response = run_agent(agent, user_message)
+        print(f"[{agent_name}] Done.")
+        if response:
+            # Save response to a log file
+            (project_dir / "agent_response.md").write_text(response)
+    except Exception as e:
+        print(f"[{agent_name}] Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def main():
-    if len(sys.argv) != 4:
-        print(f"Usage: {sys.argv[0]} <generation> <agent> <task>", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Run a single agent on a task")
+    parser.add_argument("generation", help="Generation name (e.g., '0')")
+    parser.add_argument("agent", help="Agent name (prompt filename without .md)")
+    parser.add_argument("task", help="Task name (without .md)")
+    args = parser.parse_args()
 
-    generation = sys.argv[1]
-    agent = sys.argv[2]
-    task = sys.argv[3]
-
-    run(generation, agent, task)
+    run(args.generation, args.agent, args.task)
 
 
 if __name__ == "__main__":

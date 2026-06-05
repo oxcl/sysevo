@@ -22,7 +22,7 @@ def load_config() -> dict:
     with open(config_path) as f:
         config = json.load(f)
 
-    required = ("coder_model", "coder_provider", "concurrency")
+    required = ("model", "concurrency")
     for key in required:
         if key not in config:
             print(f"Error: Missing required key '{key}' in {config_path}", file=sys.stderr)

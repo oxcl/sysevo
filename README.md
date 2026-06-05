@@ -13,9 +13,9 @@ Sysevo makes this empirical. Define your prompts, define your tasks, run them al
 ## How It Works
 
 ```
-prompts/           → 12 system prompt variants
+prompts/           → System prompt variants, organized by generation
 tasks/             → Coding tasks to evaluate against
-scripts/           → Orchestration (parallel execution via Zellij)
+scripts/           → Orchestration (LangChain agents, parallel execution)
 run/               → Agent outputs, organized by generation and agent name
 config.json        → Model and concurrency settings
 ```
@@ -55,21 +55,24 @@ Edit `config.json`:
 
 ```json
 {
-    "coder_model": "opencode-go@deepseek-v4-flash",
-    "coder_provider": "daedalus",
+    "model": "openai:gpt-4o",
     "concurrency": 12
 }
 ```
 
-- `coder_model` — The model to use for code generation
-- `coder_provider` — The provider backend
-- `concurrency` — Number of parallel agents (limited by Zellij layout)
+- `model` — LangChain model string in `"provider:model"` format (e.g., `"openai:gpt-4o"`, `"anthropic:claude-sonnet-4-6"`, `"google_genai:gemini-2.5-flash"`)
+- `concurrency` — Number of parallel agents
 
 ## Requirements
 
-- [Zellij](https://github.com/zellij-org/zellij) — terminal multiplexer for parallel execution
-- [pi](https://github.com/pi-labs/pi) — AI coding agent CLI
-- [jq](https://jqlang.github.io/jq/) — JSON parsing for config
+- Python 3.10+
+- [LangChain](https://python.langchain.com/) — agent framework
+- Provider packages: `langchain-openai`, `langchain-anthropic`, `langchain-google-genai` (install the ones you need)
+- API keys set as environment variables (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.)
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 
@@ -79,9 +82,27 @@ Edit `config.json`:
 
 # Run a single prompt against a task
 ./scripts/run.sh 0 baseline 002-chess
+
+# Breed two prompts into a new one
+./scripts/breed.sh 0 tdd simplicity tdd-simplicity
+
+# Batch breed from a pairs file
+python3 ./scripts/breed_batch.py 0 ./prompts/breeding_pairs.txt
 ```
 
 Outputs appear in `run/generation_<n>/<agent-name>/` as complete project directories.
+
+## Breeding
+
+The breeder agent takes two parent system prompts and uses an LLM to combine and mutate them into a new child prompt. See `prompts/breeding_pairs.txt` for example pairings.
+
+```bash
+# Interactive breeding
+python3 ./scripts/breed_batch.py 0 --interactive
+
+# Single pair
+./scripts/breed.sh 0 flamboyent prove-yourself competitive-excellence
+```
 
 ## Evolution
 

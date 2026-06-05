@@ -1,36 +1,18 @@
 #!/usr/bin/env python3
-"""Breed two system prompts into a new one using an LLM."""
+"""Breed two system prompts into a new one using LangChain."""
 
 import argparse
-import json
-import subprocess
 import sys
 from pathlib import Path
+
+from agent import llm_complete, load_config
 
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def load_config() -> dict:
-    config_path = ROOT / "config.json"
-    if not config_path.exists():
-        print(f"Error: Config file {config_path} not found", file=sys.stderr)
-        sys.exit(1)
-
-    with open(config_path) as f:
-        config = json.load(f)
-
-    required = ("coder_model", "coder_provider", "concurrency")
-    for key in required:
-        if key not in config:
-            print(f"Error: Missing required key '{key}' in {config_path}", file=sys.stderr)
-            sys.exit(1)
-
-    return config
-
-
-def breed(generation: str, parent_a: str, parent_b: str, child_name: str | None = None) -> str:
-    """Breed two prompts and return the child prompt content."""
+def breed(generation: str, parent_a: str, parent_b: str, child_name: str | None = None):
+    """Breed two prompts and return (child_name, child_prompt_content)."""
     source_gen = f"generation_{generation}"
     target_gen = f"generation_{int(generation) + 1}"
 
@@ -57,8 +39,7 @@ def breed(generation: str, parent_a: str, parent_b: str, child_name: str | None 
 
     # Load config
     config = load_config()
-    provider = config["coder_provider"]
-    model = config["coder_model"]
+    model = config["model"]
 
     # Read parent prompts
     parent_a_content = parent_a_file.read_text()
@@ -77,53 +58,29 @@ def breed(generation: str, parent_a: str, parent_b: str, child_name: str | None 
 
     print(f"Breeding: {parent_a} + {parent_b} → {child_name}")
     print(f"Source: {source_gen} | Target: {target_gen}")
-    print(f"Model: {model} | Provider: {provider}")
+    print(f"Model: {model}")
     print()
 
     # Run the LLM
-    cmd = [
-        "pi",
-        "--provider", provider,
-        "--model", model,
-        "--system-prompt", breeder_content,
-        "--print",
-        "--no-session",
-        breeding_message,
-    ]
-
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd=str(ROOT),
-        )
-
-        if result.returncode != 0:
-            print(f"Error: pi command failed (exit {result.returncode})", file=sys.stderr)
-            if result.stderr:
-                print(result.stderr, file=sys.stderr)
-            sys.exit(1)
-
-        child_prompt = result.stdout.strip()
-
-        if not child_prompt:
-            print("Error: LLM returned empty response.", file=sys.stderr)
-            sys.exit(1)
-
-        # Strip markdown code fences if present
-        lines = child_prompt.split("\n")
-        if lines and lines[0].strip().startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].strip().startswith("```"):
-            lines = lines[:-1]
-        child_prompt = "\n".join(lines)
-
-        return child_name, child_prompt
-
-    except FileNotFoundError:
-        print("Error: 'pi' CLI not found. Make sure it's installed.", file=sys.stderr)
+        child_prompt = llm_complete(breeder_content, breeding_message, config)
+    except Exception as e:
+        print(f"Error: LLM call failed: {e}", file=sys.stderr)
         sys.exit(1)
+
+    if not child_prompt or not child_prompt.strip():
+        print("Error: LLM returned empty response.", file=sys.stderr)
+        sys.exit(1)
+
+    # Strip markdown code fences if present
+    lines = child_prompt.split("\n")
+    if lines and lines[0].strip().startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].strip().startswith("```"):
+        lines = lines[:-1]
+    child_prompt = "\n".join(lines)
+
+    return child_name, child_prompt.strip()
 
 
 def main():
