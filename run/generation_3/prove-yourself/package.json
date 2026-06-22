@@ -1,0 +1,14 @@
+{
+  "name": "chess-prove-yourself",
+  "version": "1.0.0",
+  "description": "Definitive chess with opening book, 1500+ Elo AI, commercial UI",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

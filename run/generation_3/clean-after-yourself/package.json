@@ -1,0 +1,15 @@
+{
+  "name": "chess-clean",
+  "version": "1.0.0",
+  "description": "Production-ready chess with zero warnings and self-documenting code",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

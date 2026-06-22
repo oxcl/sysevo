@@ -1,0 +1,17 @@
+{
+  "name": "chess-life-at-stake",
+  "version": "1.0.0",
+  "description": "Chess with 100% test coverage, AI verification, and comprehensive edge cases",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

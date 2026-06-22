@@ -1,0 +1,15 @@
+{
+  "name": "chess-todoist",
+  "version": "1.0.0",
+  "description": "Clockwork system with dependency mapping and build checks",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node scripts/check.js"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

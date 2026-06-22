@@ -1,0 +1,18 @@
+{
+  "name": "chess-tdd",
+  "version": "1.0.0",
+  "description": "100+ tests, property-based, regression, performance, complete coverage",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

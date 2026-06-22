@@ -1,0 +1,15 @@
+{
+  "name": "chess-project-manager",
+  "version": "1.0.0",
+  "description": "Battle-tested process with optimized workflow and continuous verification",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "verify": "node scripts/verify.js"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

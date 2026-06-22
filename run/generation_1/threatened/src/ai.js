@@ -1,0 +1,6 @@
+import{ChessEngine}from'./chess.js';
+export class ChessAI{getBestMove(engine){if(!engine)return null;const mv=engine.allLegal('b');if(!mv||!mv.length)return null;const st=Date.now();let best=mv[0],bs=Infinity;for(const m of mv){if(!m||!m.from||!m.to)continue;try{const s=engine.doMove(m);if(!s)continue;const sc=this.ab(engine,3,-Infinity,Infinity,true);engine.undo(s);if(sc<bs){bs=sc;best=m;}}catch(e){continue;}if(Date.now()-st>200)break;}return best;}
+ab(engine,d,a,b,max){if(d===0)return engine.evaluate();const co=max?'b':'w';let mv;try{mv=engine.allLegal(co);}catch(e){return 0;}if(!mv||!mv.length){try{return engine.inC(co)?(max?100000:-100000):0;}catch(e){return 0;}}
+mv.sort((x,y)=>{const xv=engine.board[x.to[0]]&&engine.board[x.to[0]][x.to[1]]?1:0;const yv=engine.board[y.to[0]]&&engine.board[y.to[0]][y.to[1]]?1:0;return yv-xv;});
+if(max){let v=-Infinity;for(const m of mv){try{const s=engine.doMove(m);if(!s)continue;v=Math.max(v,this.ab(engine,d-1,a,b,false));engine.undo(s);a=Math.max(a,v);if(b<=a)break;}catch(e){continue;}}return v;}
+let v=Infinity;for(const m of mv){try{const s=engine.doMove(m);if(!s)continue;v=Math.min(v,this.ab(engine,d-1,a,b,true));engine.undo(s);b=Math.min(b,v);if(b<=a)break;}catch(e){continue;}}return v;}}

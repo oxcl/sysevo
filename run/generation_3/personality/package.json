@@ -1,0 +1,14 @@
+{
+  "name": "chess-personality",
+  "version": "1.0.0",
+  "description": "Peak engineering with bitboards, transposition tables, and iterative deepening",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "chess-threatened",
+  "version": "1.0.0",
+  "description": "Final assignment with quiescence search, 60fps, zero bugs",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

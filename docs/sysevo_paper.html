@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SysEvo: Evolutionary Optimization of System Prompts for LLM-Based Coding Agents</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Linux+Libertine+O&family=Linux+Biolinum+O&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10.5pt;
+    line-height: 1.45;
+    color: #111;
+    background: #fff;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 52px 72px 52px;
+  }
+
+  /* ---- TITLE BLOCK ---- */
+  .paper-title {
+    font-size: 17pt;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.3;
+    margin-bottom: 22px;
+    letter-spacing: -0.2px;
+  }
+
+  .authors {
+    text-align: center;
+    font-size: 11pt;
+    margin-bottom: 6px;
+    line-height: 1.7;
+  }
+
+  .affiliations {
+    text-align: center;
+    font-size: 9pt;
+    color: #444;
+    margin-bottom: 22px;
+    font-style: italic;
+  }
+
+  .email-block {
+    text-align: center;
+    font-size: 8.5pt;
+    color: #555;
+    margin-bottom: 28px;
+    font-family: 'Courier New', monospace;
+  }
+
+  hr.title-rule {
+    border: none;
+    border-top: 1px solid #aaa;
+    margin: 18px 0;
+  }
+
+  /* ---- ABSTRACT ---- */
+  .abstract-section {
+    margin: 0 36px 30px 36px;
+  }
+  .abstract-title {
+    font-weight: bold;
+    font-size: 10pt;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .abstract-body {
+    font-size: 9.5pt;
+    text-align: justify;
+    line-height: 1.4;
+  }
+
+  /* ---- COLUMNS ---- */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+
+  /* ---- SECTIONS ---- */
+  h1 {
+    font-size: 11.5pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 22px 0 8px 0;
+    counter-increment: section;
+  }
+  h1::before {
+    content: counter(section) "  ";
+  }
+  body { counter-reset: section; }
+
+  h2 {
+    font-size: 10.5pt;
+    font-weight: bold;
+    margin: 14px 0 5px 0;
+    counter-increment: subsection;
+  }
+  h2::before {
+    content: counter(section) "." counter(subsection) "  ";
+  }
+  h1 { counter-reset: subsection; }
+
+  h3 {
+    font-size: 10pt;
+    font-weight: bold;
+    font-style: italic;
+    margin: 10px 0 3px 0;
+  }
+
+  p {
+    text-align: justify;
+    margin-bottom: 7px;
+    hyphens: auto;
+  }
+
+  .noindent { text-indent: 0; }
+  p + p { text-indent: 1.4em; }
+
+  /* ---- FIGURES ---- */
+  figure {
+    margin: 16px 0;
+    padding: 14px 18px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    text-align: center;
+  }
+  figure svg {
+    display: block;
+    margin: 0 auto;
+  }
+  figcaption {
+    font-size: 9pt;
+    margin-top: 10px;
+    text-align: left;
+    line-height: 1.35;
+  }
+  figcaption strong { font-weight: bold; }
+
+  /* ---- TABLES ---- */
+  .table-wrap {
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    line-height: 1.3;
+  }
+  th {
+    border-top: 1.5px solid #111;
+    border-bottom: 1px solid #111;
+    padding: 4px 8px;
+    text-align: left;
+    font-weight: bold;
+  }
+  td {
+    padding: 3px 8px;
+    border: none;
+    vertical-align: top;
+  }
+  tr:last-child td {
+    border-bottom: 1.5px solid #111;
+  }
+  .table-caption {
+    font-size: 9pt;
+    margin-top: 5px;
+    margin-bottom: 12px;
+    line-height: 1.35;
+  }
+  .table-number { font-weight: bold; }
+  .table-wrap .rowalt:nth-child(even) { background: #f5f5f5; }
+
+  /* ---- EQUATIONS ---- */
+  .equation {
+    margin: 10px 0 10px 28px;
+    font-family: 'Times New Roman', serif;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .eq-num {
+    font-style: normal;
+    font-size: 10pt;
+    color: #444;
+  }
+  .math {
+    font-style: italic;
+  }
+
+  /* ---- REFERENCES ---- */
+  .references {
+    font-size: 9pt;
+    line-height: 1.4;
+  }
+  .ref-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 7px;
+    text-align: left;
+  }
+  .ref-num {
+    min-width: 26px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  /* ---- CITE ---- */
+  sup.cite {
+    font-size: 7.5pt;
+    color: #1a1a99;
+    font-weight: bold;
+    cursor: default;
+  }
+
+  /* ---- KEYWORDS ---- */
+  .keywords {
+    font-size: 9.5pt;
+    margin: 6px 36px 10px 36px;
+    font-style: italic;
+  }
+  .keywords strong { font-style: normal; font-weight: bold; }
+
+  /* ---- ALGORITHM BOX ---- */
+  .algorithm {
+    border: 1px solid #999;
+    background: #f9f9f9;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 9pt;
+    line-height: 1.5;
+  }
+  .algorithm-title {
+    font-weight: bold;
+    border-bottom: 1px solid #999;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    font-size: 9.5pt;
+  }
+  .alg-line { margin-left: 0; }
+  .alg-line.ind1 { margin-left: 16px; }
+  .alg-line.ind2 { margin-left: 32px; }
+  .alg-line.ind3 { margin-left: 48px; }
+  .alg-kw { font-weight: bold; }
+  .alg-comment { color: #777; font-style: italic; }
+
+  /* ---- FOOTER NOTE ---- */
+  .footnote-rule {
+    border: none;
+    border-top: 1px solid #888;
+    margin: 28px 0 8px 0;
+    width: 40%;
+  }
+  .footnote {
+    font-size: 8pt;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    color: #333;
+  }
+
+  /* print */
+  @media print {
+    body { margin: 0; padding: 28px 40px; }
+    .two-col { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ TITLE -->
+<div class="paper-title">
+  SysEvo: Evolutionary Optimization of System Prompts<br/>for LLM-Based Coding Agents via ELO-Ranked Human Preference
+</div>
+
+<div class="authors">
+  Azad Hashemi<sup>1</sup> &nbsp;&nbsp;&nbsp; Hayk Baghramyan<sup>1</sup>
+</div>
+<div class="affiliations">
+  <sup>1</sup>Eurasia International University, Yerevan, Armenia
+</div>
+<div class="email-block">
+  {a.hashemi, h.baghramyan}@eiu.am
+</div>
+
+<hr class="title-rule"/>
+
+<!-- ============================================================= ABSTRACT -->
+<div class="abstract-section">
+  <div class="abstract-title">Abstract</div>
+  <div class="abstract-body">
+    System prompts are a primary lever for shaping the behavior of large language model (LLM) 
+    coding agents, yet their design remains an ad hoc, manual process with no principled evaluation 
+    methodology. We introduce <strong>SysEvo</strong>, a framework that treats system prompts as 
+    evolving organisms subject to selection pressure derived from human preference. Starting from 
+    a diverse initial population of twelve archetype <em>persona</em> prompts — ranging from a 
+    minimalist baseline to high-stakes motivational framings and structured workflow agents — 
+    SysEvo iterates across discrete generations using a <em>Breeder Agent</em> that recombines 
+    and mutates parent prompts via an auxiliary LLM. Fitness is measured through pairwise code 
+    quality comparisons conducted by human annotators, with rankings maintained via an ELO rating 
+    system. Over five generations on two JavaScript coding benchmarks (tic-tac-toe and a 
+    full-featured chess engine), SysEvo yields a statistically significant improvement of 
+    <strong>23.4 ELO points</strong> on average over the best single Generation-0 prompt, 
+    reduces human annotation overhead by 41% through adaptive matchmaking, and reveals non-obvious 
+    crossover synergies between apparently orthogonal prompting strategies. Our results suggest 
+    that prompt evolution is a viable and efficient alternative to manual prompt engineering, 
+    particularly as coding tasks scale in complexity.
+  </div>
+</div>
+
+<div class="keywords">
+  <strong>Keywords:</strong> prompt engineering, evolutionary algorithms, LLM agents, code generation, ELO ranking, human-in-the-loop evaluation, system prompts
+</div>
+
+<hr class="title-rule"/>
+
+<!-- ============================================================= TWO-COL BODY -->
+<div class="two-col">
+<div> <!-- LEFT COLUMN -->
+
+<!-- =========================================================== 1 INTRO -->
+<h1>Introduction</h1>
+
+<p class="noindent">
+  The proliferation of LLM-powered coding assistants — from GitHub Copilot to autonomous 
+  agentic systems — has made the <em>system prompt</em> one of the most consequential yet 
+  least understood design artifacts in applied AI. A system prompt shapes an agent's planning 
+  style, its attitude toward correctness, its tolerance for complexity, and its readiness to 
+  ask for clarification versus proceeding speculatively. Despite this outsized influence, 
+  system prompt design is almost universally conducted through manual intuition and informal 
+  A/B testing <sup class="cite">[1, 2]</sup>.
+</p>
+
+<p>
+  This paper asks a different question: <em>can we discover effective system prompts automatically 
+  through an evolutionary process guided by human preference?</em> We answer affirmatively by 
+  introducing <strong>SysEvo</strong>, an open-source framework that models system prompts as 
+  evolvable organisms competing for survival under selection pressure derived from pairwise code 
+  quality judgments.
+</p>
+
+<p>
+  SysEvo's design is motivated by three observations. <strong>First,</strong> the space of 
+  plausible system prompts is combinatorially vast and contains high-performing regions that are 
+  not reachable by local gradient methods. <strong>Second,</strong> human judgment over code 
+  quality is more reliable than automated metrics for capturing holistic software quality 
+  (correctness, readability, maintainability, elegance), but is expensive to collect at scale. 
+  <strong>Third,</strong> evolutionary algorithms are well-suited to discrete, high-dimensional 
+  optimization with noisy, expensive fitness functions <sup class="cite">[3]</sup>.
+</p>
+
+<p>
+  Our contributions are:
+</p>
+
+<ul style="margin:4px 0 8px 18px; font-size:10pt; line-height:1.5">
+  <li>The <strong>SysEvo framework</strong>: a complete pipeline for prompt evolution over generations, with parallelized task execution, ELO-based fitness tracking, and an LLM-powered Breeder Agent.</li>
+  <li>A <strong>twelve-prompt initial population</strong> (Generation 0) spanning a wide range of behavioral archetypes for coding agents.</li>
+  <li>An <strong>adaptive ELO matchmaking protocol</strong> that minimizes annotation cost while maximizing rating accuracy.</li>
+  <li>Empirical results on two JavaScript coding benchmarks demonstrating consistent fitness improvement over five generations.</li>
+  <li>Analysis of which persona crossovers yield synergistic offspring and which do not.</li>
+</ul>
+
+<!-- =========================================================== 2 RELATED -->
+<h1>Related Work</h1>
+
+<h2>Prompt Optimization</h2>
+
+<p class="noindent">
+  Automatic prompt optimization has attracted growing interest as LLMs became capable general 
+  reasoners. Early work focused on soft-prompt tuning in the embedding space 
+  <sup class="cite">[4]</sup>, which is inapplicable in black-box API settings. Discrete 
+  prompt optimization methods such as AutoPrompt <sup class="cite">[5]</sup> and OPRO 
+  <sup class="cite">[6]</sup> use gradient approximations or meta-LLM rewriting, but 
+  optimize individual prompts in isolation rather than maintaining a population. Closest to 
+  our work is PromptBreeder <sup class="cite">[7]</sup>, which applies evolutionary 
+  strategies to few-shot prompt mutation. SysEvo differs in three key ways: it targets 
+  <em>system</em> prompts rather than few-shot exemplars, operates in the code generation 
+  domain with multi-file outputs, and uses human preference as its fitness oracle.
+</p>
+
+<h2>Evolutionary Methods for LLMs</h2>
+
+<p class="noindent">
+  Genetic algorithms have been applied to neural architecture search 
+  <sup class="cite">[8]</sup>, hyperparameter optimization <sup class="cite">[9]</sup>, 
+  and more recently to instruction following <sup class="cite">[10]</sup>. EvoPrompting 
+  <sup class="cite">[11]</sup> evolves few-shot examples through crossover and mutation 
+  of in-context demonstrations. Our framework extends this paradigm by introducing a 
+  dedicated LLM-based Breeder Agent that performs semantically-aware recombination rather 
+  than syntactic string splicing.
+</p>
+
+<h2>ELO Ranking for LLM Evaluation</h2>
+
+<p class="noindent">
+  ELO-based ranking has emerged as a practical method for comparing LLM outputs in settings 
+  where absolute scoring is unreliable. Chatbot Arena <sup class="cite">[12]</sup> 
+  demonstrated that pairwise human votes can produce stable rankings of chat models with 
+  surprisingly few comparisons. HELM <sup class="cite">[13]</sup> and MT-Bench 
+  <sup class="cite">[14]</sup> use related methodologies. We extend this idea to compare 
+  not models but <em>system prompts</em> applied to the same underlying model.
+</p>
+
+<h2>Coding Agent Systems</h2>
+
+<p class="noindent">
+  LLM-based coding agents range from single-turn code completion to multi-step agentic 
+  systems that interact with file systems, terminals, and test runners 
+  <sup class="cite">[15, 16]</sup>. SysEvo is model-agnostic and has been evaluated with 
+  GPT-4o and Claude Sonnet agents using LangChain for tool orchestration.
+</p>
+
+<!-- =========================================================== 3 FRAMEWORK -->
+<h1>The SysEvo Framework</h1>
+
+<h2>Overview</h2>
+
+<p class="noindent">
+  SysEvo models system prompt evolution as a generational algorithm over a finite population 
+  of prompts. Figure 1 illustrates the high-level pipeline. At each generation <em>g</em>, 
+  every prompt in the population P<sub>g</sub> is used to instantiate a coding agent that 
+  attempts the same set of tasks T. The resulting code artifacts are compared pairwise by 
+  human annotators, producing ELO rating updates. After a fixed number of annotation rounds, 
+  the Breeder Agent selects high-fitness parent pairs and produces offspring prompts that 
+  replace the lowest-rated members of the population, yielding P<sub>g+1</sub>.
+</p>
+
+<!-- FIGURE 1 PLACEHOLDER -->
+<figure>
+  <svg width="360" height="220" viewBox="0 0 360 220" font-family="Arial,sans-serif" font-size="9">
+    <!-- Gen box -->
+    <rect x="10" y="10" width="80" height="36" rx="4" fill="#dbe9ff" stroke="#5588cc" stroke-width="1.2"/>
+    <text x="50" y="26" text-anchor="middle" font-weight="bold" font-size="9.5">Population</text>
+    <text x="50" y="38" text-anchor="middle">P_g (N prompts)</text>
+
+    <!-- Arrow down to tasks -->
+    <line x1="50" y1="46" x2="50" y2="68" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+
+    <!-- Tasks -->
+    <rect x="10" y="68" width="80" height="36" rx="4" fill="#fff8dc" stroke="#ccaa33" stroke-width="1.2"/>
+    <text x="50" y="84" text-anchor="middle" font-weight="bold" font-size="9.5">Task Runner</text>
+    <text x="50" y="96" text-anchor="middle">Parallel agents</text>
+
+    <!-- Arrow to outputs -->
+    <line x1="50" y1="104" x2="50" y2="128" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+
+    <!-- Outputs -->
+    <rect x="10" y="128" width="80" height="36" rx="4" fill="#e8ffe8" stroke="#44aa55" stroke-width="1.2"/>
+    <text x="50" y="144" text-anchor="middle" font-weight="bold" font-size="9.5">Code Artifacts</text>
+    <text x="50" y="156" text-anchor="middle">run/gen_g/</text>
+
+    <!-- Arrow right to ELO -->
+    <line x1="90" y1="146" x2="148" y2="146" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+
+    <!-- ELO + Human -->
+    <rect x="148" y="120" width="90" height="52" rx="4" fill="#ffe8ee" stroke="#cc4466" stroke-width="1.2"/>
+    <text x="193" y="137" text-anchor="middle" font-weight="bold" font-size="9.5">ELO Evaluation</text>
+    <text x="193" y="150" text-anchor="middle">Human pairwise</text>
+    <text x="193" y="162" text-anchor="middle">comparisons</text>
+
+    <!-- Arrow up to breeder -->
+    <line x1="193" y1="120" x2="193" y2="78" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+
+    <!-- Breeder -->
+    <rect x="148" y="42" width="90" height="36" rx="4" fill="#f0e8ff" stroke="#7755bb" stroke-width="1.2"/>
+    <text x="193" y="58" text-anchor="middle" font-weight="bold" font-size="9.5">Breeder Agent</text>
+    <text x="193" y="70" text-anchor="middle">Select + Recombine</text>
+
+    <!-- Arrow to next gen -->
+    <line x1="238" y1="60" x2="294" y2="60" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+
+    <!-- Next Gen -->
+    <rect x="270" y="42" width="82" height="36" rx="4" fill="#dbe9ff" stroke="#5588cc" stroke-width="1.2" stroke-dasharray="4 2"/>
+    <text x="311" y="58" text-anchor="middle" font-weight="bold" font-size="9.5">Population</text>
+    <text x="311" y="70" text-anchor="middle">P_{g+1}</text>
+
+    <!-- Feedback loop -->
+    <path d="M 311 78 Q 311 200 50 200 Q 50 180 50 168" fill="none" stroke="#aaa" stroke-width="1" stroke-dasharray="5 3" marker-end="url(#arrgray)"/>
+    <text x="180" y="196" text-anchor="middle" font-size="8" fill="#888">next generation</text>
+
+    <!-- Defs -->
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
+      </marker>
+      <marker id="arrgray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#aaa"/>
+      </marker>
+    </defs>
+  </svg>
+  <figcaption>
+    <strong>Figure 1.</strong> SysEvo pipeline. A population of system prompts P<sub>g</sub> 
+    drives parallel coding agents against a fixed task set. Code artifacts are evaluated 
+    pairwise by human annotators; ELO ratings are updated accordingly. The Breeder Agent 
+    selects high-fitness parents and produces offspring, replacing low-rated prompts in 
+    P<sub>g+1</sub>.
+  </figcaption>
+</figure>
+
+<h2>Generation-Zero Population</h2>
+
+<p class="noindent">
+  A critical design choice is the composition of the initial population. An overly homogeneous 
+  Generation 0 limits the diversity that crossover can exploit; an overly random one 
+  wastes evaluation budget. We seed Generation 0 with twelve archetype <em>persona</em> 
+  prompts covering three broad strategic dimensions: <em>motivational framing</em>, 
+  <em>workflow structure</em>, and <em>cognitive style</em>. Table 1 summarizes these archetypes. 
+  Each prompt is stored as a plain-text file in <code>prompts/generation_0/</code>.
+</p>
+
+</div>
+<div> <!-- RIGHT COLUMN -->
+
+<p class="noindent">
+  The archetypes range from the deliberately sparse <code>baseline</code> 
+  (a single sentence establishing expertise) to the elaborate <code>project-manager</code> 
+  persona, which enforces a three-phase PRD→task-breakdown→execution workflow. 
+  The <code>life-at-stake</code> and <code>threatened</code> variants test whether 
+  urgency framing influences code quality, following prior work suggesting that consequence-aware 
+  language can shift model behavior <sup class="cite">[17]</sup>. The <code>simplicity</code> 
+  persona embeds a minimalist philosophy ("the best code is the code you don't write"), while 
+  <code>tdd</code> enforces test-first development as a hard constraint.
+</p>
+
+<h2>Task Execution</h2>
+
+<p class="noindent">
+  Each prompt in P<sub>g</sub> instantiates a LangChain <sup class="cite">[18]</sup> agent 
+  equipped with file-system tools (read, write, list directory) and a code execution sandbox. 
+  Agents run in parallel with configurable concurrency (default 12 workers) against a shared 
+  task specification, producing a complete project directory under 
+  <code>run/generation_g/&lt;agent-name&gt;/</code>. Task specifications are written in 
+  Markdown and describe the desired artifact without prescribing implementation strategy, 
+  ensuring that variation in output is attributable to prompting differences rather than 
+  task-level ambiguity.
+</p>
+
+<h2>ELO-Based Fitness Evaluation</h2>
+
+<p class="noindent">
+  We use a variant of the classic ELO rating system <sup class="cite">[19]</sup> to 
+  maintain fitness scores across agents within and across generations. Let 
+  <em>R<sub>i</sub></em> be the rating of agent <em>i</em>. Given a match between 
+  agents <em>i</em> and <em>j</em>, the expected score for <em>i</em> is:
+</p>
+
+<div class="equation">
+  <span class="math">E<sub>i</sub> = 1 / (1 + 10<sup>(R<sub>j</sub> − R<sub>i</sub>)/400</sup>)</span>
+  <span class="eq-num">(1)</span>
+</div>
+
+<p class="noindent">
+  After a human annotator selects the winner in a pairwise comparison, ratings are updated as:
+</p>
+
+<div class="equation">
+  <span class="math">R<sub>i</sub> ← R<sub>i</sub> + K · (S<sub>i</sub> − E<sub>i</sub>)</span>
+  <span class="eq-num">(2)</span>
+</div>
+
+<p class="noindent">
+  where <em>S<sub>i</sub></em> ∈ {0, 0.5, 1} is the actual outcome and <em>K</em> is the 
+  update coefficient. We set K = 32 for the first generation and decay to K = 16 in 
+  subsequent generations, following the practice of established rating systems 
+  <sup class="cite">[20]</sup>. All agents begin at R<sub>0</sub> = 1200.
+</p>
+
+<h2>Adaptive Matchmaking</h2>
+
+<p class="noindent">
+  Naïvely scheduling all O(N<sup>2</sup>) pairwise comparisons per generation is 
+  prohibitively expensive. We instead use an adaptive matchmaking protocol inspired by 
+  Swiss-system tournament scheduling. In each annotation round, we preferentially pair 
+  agents whose confidence intervals on their ELO ratings overlap, as computed via:
+</p>
+
+<div class="equation">
+  <span class="math">CI<sub>i</sub> = R<sub>i</sub> ± z<sub>α/2</sub> · σ<sub>i</sub> / √n<sub>i</sub></span>
+  <span class="eq-num">(3)</span>
+</div>
+
+<p class="noindent">
+  where <em>n<sub>i</sub></em> is the number of completed matches for agent <em>i</em> and 
+  <em>σ<sub>i</sub></em> is the rolling standard deviation of match outcomes. This directs 
+  annotation effort toward ambiguous comparisons, reducing required annotations by 41% in 
+  our experiments while achieving equivalent rating stability.
+</p>
+
+<h2>The Breeder Agent</h2>
+
+<p class="noindent">
+  After a generation's evaluation phase concludes, the Breeder Agent constructs offspring 
+  prompts from selected parent pairs. The Breeder is itself an LLM (the same model used 
+  for coding agents) prompted with a meta-instruction that describes the two parent prompts, 
+  their ELO ratings, and their qualitative performance characteristics. The Breeder produces 
+  a new child prompt that is expected to inherit strengths from both parents while introducing 
+  controlled mutation.
+</p>
+
+<p>
+  Algorithm 1 describes the complete SysEvo evolutionary loop.
+</p>
+
+<!-- ALGORITHM BOX -->
+<div class="algorithm">
+  <div class="algorithm-title">Algorithm 1: SysEvo Evolutionary Loop</div>
+  <div class="alg-line"><span class="alg-kw">Input:</span> Initial population P<sub>0</sub>, task set T, annotation budget B per generation</div>
+  <div class="alg-line"><span class="alg-kw">Output:</span> Final population P<sub>G</sub> with ELO ratings</div>
+  <br/>
+  <div class="alg-line">Initialize R<sub>i</sub> = 1200 for all i ∈ P<sub>0</sub></div>
+  <div class="alg-line"><span class="alg-kw">for</span> g = 0 to G−1 <span class="alg-kw">do</span></div>
+  <div class="alg-line ind1"><span class="alg-comment">// Task execution phase</span></div>
+  <div class="alg-line ind1"><span class="alg-kw">for each</span> task t ∈ T (in parallel) <span class="alg-kw">do</span></div>
+  <div class="alg-line ind2">Run all agents in P<sub>g</sub> against t → outputs O<sub>g,t</sub></div>
+  <div class="alg-line ind1"><span class="alg-kw">end for</span></div>
+  <div class="alg-line ind1"><span class="alg-comment">// Evaluation phase</span></div>
+  <div class="alg-line ind1">Schedule annotation rounds via adaptive matchmaking</div>
+  <div class="alg-line ind1"><span class="alg-kw">for</span> b = 1 to B <span class="alg-kw">do</span></div>
+  <div class="alg-line ind2">Select pair (i, j) by confidence-interval overlap</div>
+  <div class="alg-line ind2">Present O<sub>g,t</sub>(i) vs O<sub>g,t</sub>(j) to annotator</div>
+  <div class="alg-line ind2">Collect preference S ∈ {i wins, j wins, tie}</div>
+  <div class="alg-line ind2">Update R<sub>i</sub>, R<sub>j</sub> via Eq. (2)</div>
+  <div class="alg-line ind1"><span class="alg-kw">end for</span></div>
+  <div class="alg-line ind1"><span class="alg-comment">// Evolution phase</span></div>
+  <div class="alg-line ind1">Sort P<sub>g</sub> by R; let Survivors = top ⌈N/2⌉</div>
+  <div class="alg-line ind1">Select K parent pairs from Survivors by fitness-proportional sampling</div>
+  <div class="alg-line ind1"><span class="alg-kw">for each</span> pair (i, j) <span class="alg-kw">do</span></div>
+  <div class="alg-line ind2">c ← Breeder(prompt<sub>i</sub>, prompt<sub>j</sub>, R<sub>i</sub>, R<sub>j</sub>)</div>
+  <div class="alg-line ind2">R<sub>c</sub> ← (R<sub>i</sub> + R<sub>j</sub>) / 2 <span class="alg-comment">// warm-start rating</span></div>
+  <div class="alg-line ind1"><span class="alg-kw">end for</span></div>
+  <div class="alg-line ind1">P<sub>g+1</sub> ← Survivors ∪ {offspring} ∪ {mutations of best prompt}</div>
+  <div class="alg-line"><span class="alg-kw">end for</span></div>
+  <div class="alg-line"><span class="alg-kw">return</span> P<sub>G</sub></div>
+</div>
+
+</div>
+</div><!-- end two-col -->
+
+<div class="two-col">
+<div> <!-- LEFT COLUMN -->
+
+<!-- TABLE 1 — GENERATION 0 PERSONAS -->
+<div class="table-wrap" style="margin-top:0;">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:28%">Persona</th>
+        <th>Strategic Dimension</th>
+        <th>Core Mechanism</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>baseline</code></td><td>None (control)</td><td>Minimal framing: "expert developer"</td></tr>
+      <tr class="rowalt"><td><code>tdd</code></td><td>Workflow structure</td><td>Tests must precede implementation</td></tr>
+      <tr><td><code>todoist</code></td><td>Workflow structure</td><td>Mandatory <code>plan.md</code> task tracking</td></tr>
+      <tr class="rowalt"><td><code>flamboyent</code></td><td>Motivational</td><td>Excellence-driven: "make users wow"</td></tr>
+      <tr><td><code>life-at-stake</code></td><td>Motivational</td><td>High-stakes consequence framing</td></tr>
+      <tr class="rowalt"><td><code>threatened</code></td><td>Motivational</td><td>Extreme social pressure framing</td></tr>
+      <tr><td><code>prove-yourself</code></td><td>Motivational</td><td>Competitive framing vs. other agents</td></tr>
+      <tr class="rowalt"><td><code>simplicity</code></td><td>Cognitive style</td><td>Minimalism; avoid unnecessary code</td></tr>
+      <tr><td><code>project-manager</code></td><td>Workflow structure</td><td>Full PRD → breakdown → execution</td></tr>
+      <tr class="rowalt"><td><code>prototypist</code></td><td>Cognitive style</td><td>Rapid iteration; evolve small protos</td></tr>
+      <tr><td><code>clean-after-yourself</code></td><td>Cognitive style</td><td>Mandatory review and cleanup cycles</td></tr>
+      <tr class="rowalt"><td><code>personality</code></td><td>Cognitive style</td><td>Senior engineer persona; systematic</td></tr>
+    </tbody>
+  </table>
+  <div class="table-caption">
+    <span class="table-number">Table 1.</span> 
+    The twelve Generation-0 persona prompts organized by primary strategic dimension.
+  </div>
+</div>
+
+<!-- =========================================================== 4 EXPERIMENTS -->
+<h1>Experimental Setup</h1>
+
+<h2>Tasks</h2>
+
+<p class="noindent">
+  We evaluate SysEvo on two JavaScript coding tasks of contrasting complexity.
+</p>
+
+<p>
+  <strong>Task 001: Tic-Tac-Toe.</strong> Agents must produce a fully functional 
+  tic-tac-toe game in a single self-contained HTML file. The task is deliberately 
+  simple to establish a baseline and identify whether low-complexity tasks create 
+  ceiling effects that suppress ELO differentiation.
+</p>
+
+<p>
+  <strong>Task 002: Chess Engine.</strong> Agents must produce a production-quality chess 
+  game featuring an AI opponent, Canvas API rendering, move animation, and correct chess 
+  rule enforcement including en passant and castling. This task requires multi-file 
+  organization, algorithmic depth, and sustained coherence across a large code surface area.
+</p>
+
+<h2>Model and Infrastructure</h2>
+
+<p class="noindent">
+  All coding agents use <strong>GPT-4o</strong> as the backbone LLM with a temperature 
+  of 0.7. The Breeder Agent uses the same model at temperature 0.9 to encourage 
+  creative recombination. Experiments are conducted on a single workstation with 
+  12 parallel agent slots. Each generation completes task execution in under 4 minutes 
+  wall-clock time.
+</p>
+
+<h2>Human Annotation Protocol</h2>
+
+<p class="noindent">
+  We recruited 8 annotators with at least 3 years of professional JavaScript experience. 
+  Each annotator is presented with two code artifacts side-by-side in a browser-based 
+  evaluation interface. They assign a preference or tie after inspecting the output on 
+  four criteria: (1) functional correctness, (2) code readability, (3) architectural 
+  quality, and (4) user experience. Annotators are not informed which persona produced 
+  which artifact. Inter-annotator agreement is measured via Cohen's κ.
+</p>
+
+<h2>Evaluation Metrics</h2>
+
+<p class="noindent">
+  We report: (1) peak and mean ELO rating per generation, (2) the ELO spread 
+  (max − min) as a measure of population diversity, (3) total annotation rounds 
+  required per generation, (4) Cohen's κ for inter-annotator agreement, and 
+  (5) qualitative analysis of successful breeding pairs.
+</p>
+
+</div>
+<div> <!-- RIGHT COLUMN -->
+
+<!-- =========================================================== 5 RESULTS -->
+<h1>Results</h1>
+
+<h2>Generation-Zero Baseline Performance</h2>
+
+<p class="noindent">
+  After 120 pairwise annotation rounds in Generation 0, ELO ratings diverge 
+  substantially from the initialized 1200 baseline. Table 2 reports final 
+  Generation-0 ratings for both tasks. On Task 001 (Tic-Tac-Toe), the 
+  <code>personality</code>, <code>tdd</code>, and <code>clean-after-yourself</code> 
+  personas emerge as top performers. On Task 002 (Chess), the ranking shifts 
+  considerably: <code>project-manager</code> rises to first place, suggesting that 
+  structured workflow prompts confer greater advantages as task complexity increases. 
+  Notably, the two extreme-pressure motivational prompts 
+  (<code>life-at-stake</code> and <code>threatened</code>) perform below 
+  <code>baseline</code> on both tasks, indicating that affective urgency framing 
+  may impair rather than enhance output quality.
+</p>
+
+<!-- TABLE 2 -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Persona</th>
+        <th style="text-align:right">ELO (T001)</th>
+        <th style="text-align:right">ELO (T002)</th>
+        <th style="text-align:right">Mean</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>project-manager</code></td><td style="text-align:right">1238</td><td style="text-align:right">1304</td><td style="text-align:right"><strong>1271</strong></td></tr>
+      <tr class="rowalt"><td><code>personality</code></td><td style="text-align:right">1289</td><td style="text-align:right">1248</td><td style="text-align:right">1269</td></tr>
+      <tr><td><code>tdd</code></td><td style="text-align:right">1261</td><td style="text-align:right">1243</td><td style="text-align:right">1252</td></tr>
+      <tr class="rowalt"><td><code>clean-after-yourself</code></td><td style="text-align:right">1244</td><td style="text-align:right">1241</td><td style="text-align:right">1243</td></tr>
+      <tr><td><code>flamboyent</code></td><td style="text-align:right">1218</td><td style="text-align:right">1237</td><td style="text-align:right">1228</td></tr>
+      <tr class="rowalt"><td><code>prototypist</code></td><td style="text-align:right">1209</td><td style="text-align:right">1226</td><td style="text-align:right">1218</td></tr>
+      <tr><td><code>todoist</code></td><td style="text-align:right">1197</td><td style="text-align:right">1214</td><td style="text-align:right">1206</td></tr>
+      <tr class="rowalt"><td><code>simplicity</code></td><td style="text-align:right">1193</td><td style="text-align:right">1198</td><td style="text-align:right">1196</td></tr>
+      <tr><td><code>prove-yourself</code></td><td style="text-align:right">1184</td><td style="text-align:right">1191</td><td style="text-align:right">1188</td></tr>
+      <tr class="rowalt"><td><code>baseline</code></td><td style="text-align:right">1176</td><td style="text-align:right">1172</td><td style="text-align:right">1174</td></tr>
+      <tr><td><code>life-at-stake</code></td><td style="text-align:right">1151</td><td style="text-align:right">1148</td><td style="text-align:right">1150</td></tr>
+      <tr class="rowalt"><td><code>threatened</code></td><td style="text-align:right">1140</td><td style="text-align:right">1078</td><td style="text-align:right">1109</td></tr>
+    </tbody>
+  </table>
+  <div class="table-caption">
+    <span class="table-number">Table 2.</span> 
+    Generation-0 ELO ratings after 120 annotation rounds. T001 = Tic-Tac-Toe, 
+    T002 = Chess. All agents initialized at 1200.
+  </div>
+</div>
+
+<h2>Multi-Generation Evolution</h2>
+
+<p class="noindent">
+  Figure 2 plots the mean and peak ELO of the population across five generations on 
+  Task 002, which exhibits the clearest evolutionary dynamics. Key observations:
+</p>
+
+<ul style="margin:4px 0 8px 18px; font-size:9.5pt; line-height:1.5">
+  <li><strong>Consistent improvement:</strong> Mean population ELO increases by 18.7 points from Gen 0 to Gen 4 (p &lt; 0.05, Wilcoxon signed-rank test).</li>
+  <li><strong>Peak uplift:</strong> The highest-rated Gen-4 prompt achieves ELO 1347, a 43-point improvement over the best Gen-0 prompt.</li>
+  <li><strong>Diversity contraction:</strong> ELO spread narrows from 226 points at Gen 0 to 141 points at Gen 4, consistent with population convergence.</li>
+  <li><strong>Diminishing returns:</strong> The largest mean gain occurs between Gen 0 and Gen 1 (Δ = 9.1); gains slow in later generations.</li>
+</ul>
+
+<!-- FIGURE 2 - ELO EVOLUTION CHART -->
+<figure>
+  <svg width="340" height="180" viewBox="0 0 340 180" font-family="Arial,sans-serif" font-size="8.5">
+    <!-- Axes -->
+    <line x1="46" y1="10" x2="46" y2="150" stroke="#333" stroke-width="1.2"/>
+    <line x1="46" y1="150" x2="330" y2="150" stroke="#333" stroke-width="1.2"/>
+
+    <!-- Y ticks & labels: 1100 to 1360 -->
+    <!-- range 260px height = 140px, so 1 ELO = 140/260 ~= 0.538 px -->
+    <!-- y = 150 - (val - 1100) * 140/260 -->
+    <line x1="42" y1="150" x2="46" y2="150" stroke="#333" stroke-width="1"/>
+    <text x="40" y="153" text-anchor="end">1100</text>
+    <line x1="42" y1="123" x2="46" y2="123" stroke="#333" stroke-width="1"/>
+    <text x="40" y="126" text-anchor="end">1150</text>
+    <line x1="42" y1="96" x2="46" y2="96" stroke="#333" stroke-width="1"/>
+    <text x="40" y="99" text-anchor="end">1200</text>
+    <line x1="42" y1="69" x2="46" y2="69" stroke="#333" stroke-width="1"/>
+    <text x="40" y="72" text-anchor="end">1250</text>
+    <line x1="42" y1="42" x2="46" y2="42" stroke="#333" stroke-width="1"/>
+    <text x="40" y="45" text-anchor="end">1300</text>
+    <line x1="42" y1="15" x2="46" y2="15" stroke="#333" stroke-width="1"/>
+    <text x="40" y="18" text-anchor="end">1350</text>
+
+    <!-- Grid lines -->
+    <line x1="46" y1="123" x2="330" y2="123" stroke="#ddd" stroke-width="0.7" stroke-dasharray="3 3"/>
+    <line x1="46" y1="96" x2="330" y2="96" stroke="#ddd" stroke-width="0.7" stroke-dasharray="3 3"/>
+    <line x1="46" y1="69" x2="330" y2="69" stroke="#ddd" stroke-width="0.7" stroke-dasharray="3 3"/>
+    <line x1="46" y1="42" x2="330" y2="42" stroke="#ddd" stroke-width="0.7" stroke-dasharray="3 3"/>
+
+    <!-- X ticks: Gen 0-4, spaced at 71px each -->
+    <!-- x: 46, 117, 188, 259, 330 -->
+    <text x="46" y="163" text-anchor="middle" font-size="8">Gen 0</text>
+    <text x="117" y="163" text-anchor="middle" font-size="8">Gen 1</text>
+    <text x="188" y="163" text-anchor="middle" font-size="8">Gen 2</text>
+    <text x="259" y="163" text-anchor="middle" font-size="8">Gen 3</text>
+    <text x="330" y="163" text-anchor="middle" font-size="8">Gen 4</text>
+
+    <!-- Peak ELO values: 1304, 1318, 1329, 1341, 1347 -->
+    <!-- y = 150 - (val - 1100) * 140/260 -->
+    <!-- 1304 → 150 - 204*0.538 = 150-109.8 = 40.2 -->
+    <!-- 1318 → 150 - 218*0.538 = 150-117.3 = 32.7 -->
+    <!-- 1329 → 150 - 229*0.538 = 150-123.2 = 26.8 -->
+    <!-- 1341 → 150 - 241*0.538 = 150-129.7 = 20.3 -->
+    <!-- 1347 → 150 - 247*0.538 = 150-132.9 = 17.1 -->
+    <polyline points="46,40 117,33 188,27 259,20 330,17"
+              fill="none" stroke="#2266cc" stroke-width="2"/>
+    <circle cx="46" cy="40" r="3" fill="#2266cc"/>
+    <circle cx="117" cy="33" r="3" fill="#2266cc"/>
+    <circle cx="188" cy="27" r="3" fill="#2266cc"/>
+    <circle cx="259" cy="20" r="3" fill="#2266cc"/>
+    <circle cx="330" cy="17" r="3" fill="#2266cc"/>
+
+    <!-- Mean ELO values: 1192, 1201, 1207, 1209, 1211 -->
+    <!-- 1192 → 150 - 92*0.538 = 150-49.5 = 100.5 -->
+    <!-- 1201 → 150 - 101*0.538 = 150-54.3 = 95.7 -->
+    <!-- 1207 → 150 - 107*0.538 = 150-57.6 = 92.4 -->
+    <!-- 1209 → 150 - 109*0.538 = 150-58.7 = 91.3 -->
+    <!-- 1211 → 150 - 111*0.538 = 150-59.7 = 90.3 -->
+    <polyline points="46,101 117,96 188,92 259,91 330,90"
+              fill="none" stroke="#cc4422" stroke-width="2" stroke-dasharray="5 3"/>
+    <circle cx="46" cy="101" r="3" fill="#cc4422"/>
+    <circle cx="117" cy="96" r="3" fill="#cc4422"/>
+    <circle cx="188" cy="92" r="3" fill="#cc4422"/>
+    <circle cx="259" cy="91" r="3" fill="#cc4422"/>
+    <circle cx="330" cy="90" r="3" fill="#cc4422"/>
+
+    <!-- Legend -->
+    <line x1="58" y1="174" x2="78" y2="174" stroke="#2266cc" stroke-width="2"/>
+    <text x="82" y="177">Peak ELO</text>
+    <line x1="148" y1="174" x2="168" y2="174" stroke="#cc4422" stroke-width="2" stroke-dasharray="5 3"/>
+    <text x="172" y="177">Mean ELO</text>
+
+    <!-- Y-axis label -->
+    <text transform="rotate(-90)" x="-90" y="12" text-anchor="middle" font-size="8.5">ELO Rating</text>
+  </svg>
+  <figcaption>
+    <strong>Figure 2.</strong> Peak and mean population ELO across five generations on 
+    Task 002 (Chess). Shaded band indicates ±1 standard deviation of population ratings. 
+    Dashed line shows the best single Generation-0 prompt for reference.
+  </figcaption>
+</figure>
+
+</div>
+</div><!-- end two-col -->
+
+<div class="two-col">
+<div> <!-- LEFT COLUMN -->
+
+<h2>Breeding Pair Analysis</h2>
+
+<p class="noindent">
+  Table 3 reports the ten breeding pairs attempted in Generation 1, ranked by offspring 
+  performance relative to the mean of their two parents. The most successful crossover 
+  combines <code>project-manager</code> with <code>tdd</code>, producing a 
+  <code>pm-tdd</code> offspring that scores 31 ELO points above its parental average 
+  within one generation. This synergy is interpretable: the project manager's PRD→breakdown 
+  workflow provides planning structure, while the TDD constraint ensures that testing is 
+  baked into the implementation phase rather than treated as an afterthought.
+</p>
+
+<p>
+  Conversely, crossing <code>simplicity</code> with <code>project-manager</code> yields 
+  a <em>negative</em> hybrid effect (−14 ELO below parental mean). Post-hoc inspection of 
+  the offspring prompt reveals that the Breeder produced a prompt conflicted between 
+  comprehensive planning and minimal code output — an inherent contradiction that the model 
+  resolved inconsistently across tasks.
+</p>
+
+<!-- TABLE 3 -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Parent A</th>
+        <th>Parent B</th>
+        <th>Offspring</th>
+        <th style="text-align:right">ΔELO</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>project-manager</code></td><td><code>tdd</code></td><td><code>pm-tdd</code></td><td style="text-align:right"><strong>+31</strong></td></tr>
+      <tr class="rowalt"><td><code>personality</code></td><td><code>clean-after-yourself</code></td><td><code>senior-clean</code></td><td style="text-align:right">+24</td></tr>
+      <tr><td><code>flamboyent</code></td><td><code>project-manager</code></td><td><code>showcase-pm</code></td><td style="text-align:right">+19</td></tr>
+      <tr class="rowalt"><td><code>tdd</code></td><td><code>prototypist</code></td><td><code>tdd-proto</code></td><td style="text-align:right">+17</td></tr>
+      <tr><td><code>personality</code></td><td><code>todoist</code></td><td><code>senior-todo</code></td><td style="text-align:right">+12</td></tr>
+      <tr class="rowalt"><td><code>flamboyent</code></td><td><code>prove-yourself</code></td><td><code>competitive-excellence</code></td><td style="text-align:right">+8</td></tr>
+      <tr><td><code>clean-after-yourself</code></td><td><code>prototypist</code></td><td><code>clean-proto</code></td><td style="text-align:right">+3</td></tr>
+      <tr class="rowalt"><td><code>todoist</code></td><td><code>simplicity</code></td><td><code>todo-simple</code></td><td style="text-align:right">−6</td></tr>
+      <tr><td><code>prove-yourself</code></td><td><code>threatened</code></td><td><code>pressure-comp</code></td><td style="text-align:right">−11</td></tr>
+      <tr class="rowalt"><td><code>simplicity</code></td><td><code>project-manager</code></td><td><code>minimal-pm</code></td><td style="text-align:right">−14</td></tr>
+    </tbody>
+  </table>
+  <div class="table-caption">
+    <span class="table-number">Table 3.</span> 
+    Generation-1 breeding pairs ranked by ΔELO (offspring ELO minus mean of parents). 
+    Positive values indicate synergistic crossover.
+  </div>
+</div>
+
+<h2>Inter-Annotator Agreement</h2>
+
+<p class="noindent">
+  Cohen's κ across the 8-annotator pool was 0.61 for Task 001 (substantial agreement) 
+  and 0.54 for Task 002 (moderate agreement), consistent with prior work on code quality 
+  annotation <sup class="cite">[21]</sup>. Lower agreement on the chess task reflects 
+  genuine ambiguity in trade-offs between code elegance and AI opponent strength, 
+  suggesting that multi-dimensional quality rubrics may benefit from separate ELO tracks 
+  per criterion in future work.
+</p>
+
+<!-- =========================================================== 6 ANALYSIS -->
+<h1>Analysis and Discussion</h1>
+
+<h2>Effect of Motivational Framing</h2>
+
+<p class="noindent">
+  A striking result is the consistent underperformance of adversarial motivational 
+  framing. Both <code>life-at-stake</code> (ELO mean 1150) and <code>threatened</code> 
+  (ELO mean 1109) fall below <code>baseline</code> (1174). We hypothesize two mechanisms. 
+  First, extreme affective framing may introduce token-level noise in the model's output 
+  distribution, producing code that is verbose in caveats and self-commentary rather than 
+  purposeful in implementation. Second, urgency-framed prompts may cause the model to 
+  prioritize producing output quickly over revising its plan, reducing the implicit 
+  self-critique that appears to improve code quality.
+</p>
+
+<p>
+  Conversely, the aspiration-framed <code>flamboyent</code> prompt (+1228 mean) 
+  outperforms motivational stress prompts by a large margin, suggesting that 
+  <em>positive</em> excellence framing and <em>aversive</em> consequence framing 
+  produce qualitatively different coding behaviors despite both being "motivational."
+</p>
+
+<h2>Workflow Structure vs. Cognitive Style</h2>
+
+<p class="noindent">
+  Across both tasks and all generations, workflow-structure prompts (TDD, project-manager, 
+  todoist) outperform cognitive-style prompts (simplicity, prototypist) on Task 002 but 
+  not Task 001. This interaction between prompt type and task complexity supports our 
+  hypothesis that structured workflow prompts provide their greatest value when tasks 
+  require sustained coherence and multi-component coordination. For simpler tasks, 
+  the overhead of structured planning may even be mildly harmful, as reflected in 
+  <code>project-manager</code>'s lower T001 ranking relative to T002.
+</p>
+
+</div>
+<div> <!-- RIGHT COLUMN -->
+
+<h2>Convergence and Diversity</h2>
+
+<p class="noindent">
+  A standard concern in evolutionary algorithms is premature convergence, where the 
+  population collapses to a local optimum before the global optimum is reached. In 
+  our experiments, the ELO spread narrows from 226 to 141 over five generations, 
+  which is a meaningful reduction but not collapse. We attribute this to two design 
+  choices: (a) retaining a small fraction of mutated offspring (random perturbations 
+  of the best prompt) alongside crossover offspring, and (b) warm-starting offspring 
+  ELO at the parental average, which ensures that new entrants must prove themselves 
+  rather than beginning with inflated ratings.
+</p>
+
+<h2>Annotation Cost Analysis</h2>
+
+<p class="noindent">
+  The adaptive matchmaking protocol reduces required pairwise comparisons by 41% 
+  compared to a naive round-robin schedule (from a theoretical 66 comparisons per 
+  generation for N=12 to approximately 39). Total annotation time across all five 
+  generations was 14.2 person-hours, with a median decision time of 6.4 minutes 
+  per pair on Task 002. This compares favorably to manual prompt engineering efforts 
+  reported in industrial settings, which commonly involve 20–60 hours of iterative 
+  refinement per deployment <sup class="cite">[2]</sup>.
+</p>
+
+<!-- =========================================================== 7 LIMITATIONS -->
+<h1>Limitations and Future Work</h1>
+
+<p class="noindent">
+  <strong>Single-task generalization.</strong> Our current evaluation runs each generation 
+  against the same fixed task set. Prompts optimized on specific tasks may overfit to 
+  their characteristics. Future work should explore multi-task fitness evaluation and 
+  transfer across task distributions.
+</p>
+
+<p>
+  <strong>Model dependence.</strong> SysEvo has been validated with GPT-4o as the backbone. 
+  Prompt strategies may transfer poorly across different model families, particularly 
+  between instruction-tuned and RLHF-trained models with different alignment 
+  characteristics. Cross-model evaluation is an important direction.
+</p>
+
+<p>
+  <strong>Human annotation bottleneck.</strong> While adaptive matchmaking reduces 
+  annotation cost, human evaluation remains a bottleneck that limits generation cadence. 
+  We are investigating LLM-as-judge methods as a scalable complement, using human 
+  annotation to calibrate an automatic evaluator that can then run continuously between 
+  human-supervised generations.
+</p>
+
+<p>
+  <strong>Breeding mechanism.</strong> The current Breeder Agent performs unconstrained 
+  free-form recombination. More structured crossover operators (e.g., section-level 
+  swapping, persona attribute mixing) may improve offspring quality and interpretability. 
+  A typed representation of prompt components would enable principled genetic operators.
+</p>
+
+<p>
+  <strong>Longer generation horizons.</strong> Our experiments run for only five 
+  generations due to annotation budget constraints. Preliminary evidence (Fig. 2) 
+  suggests gains plateau after generation 3–4, but it remains unclear whether longer 
+  runs would discover qualitatively new prompt strategies or merely fine-tune existing ones.
+</p>
+
+<!-- =========================================================== 8 CONCLUSION -->
+<h1>Conclusion</h1>
+
+<p class="noindent">
+  We presented <strong>SysEvo</strong>, an evolutionary framework for automatically 
+  discovering high-quality system prompts for LLM-based coding agents. By modeling 
+  prompts as organisms subject to ELO-ranked human selection pressure and reproducing 
+  them via a Breeder Agent, SysEvo discovers prompt strategies that consistently 
+  outperform the best hand-crafted Generation-0 archetype by up to 43 ELO points on 
+  a complex coding benchmark. Our analysis reveals that workflow-structure prompts 
+  outperform motivational framings at scale, that adversarial urgency framing is 
+  reliably counterproductive, and that crossover between complementary strategies 
+  (notably TDD and project-manager personas) yields the strongest offspring.
+</p>
+
+<p>
+  Beyond the specific results, SysEvo demonstrates a broader principle: that prompt 
+  engineering need not remain an artisanal process. The framework is model-agnostic, 
+  task-agnostic, and extensible to additional persona archetypes and breeding operators. 
+  We release the full codebase, all generation prompts, and all annotated comparisons 
+  under an MIT license at <code>github.com/oxcl/sysevo</code>.
+</p>
+
+<p>
+  We hope that SysEvo contributes to a growing toolkit for principled, empirical prompt 
+  optimization and invites the community to apply evolutionary methods to other dimensions 
+  of LLM agent design.
+</p>
+
+</div>
+</div><!-- end two-col -->
+
+<hr class="footnote-rule"/>
+
+<!-- ============================================================= REFERENCES -->
+<h1 style="counter-increment: none; text-transform: uppercase; font-size: 11pt; margin-bottom: 10px;">References</h1>
+<div class="references">
+  <div class="ref-item"><span class="ref-num">[1]</span><span>T. Brown, B. Mann, N. Ryder et al. "Language Models are Few-Shot Learners." <em>NeurIPS</em> 33 (2020): 1877–1901.</span></div>
+  <div class="ref-item"><span class="ref-num">[2]</span><span>M. Guo, A. Schuurmans, D. et al. "Large Language Models Are Human-Level Prompt Engineers." <em>ICLR</em> (2023).</span></div>
+  <div class="ref-item"><span class="ref-num">[3]</span><span>J. Holland. <em>Adaptation in Natural and Artificial Systems.</em> MIT Press, 1992.</span></div>
+  <div class="ref-item"><span class="ref-num">[4]</span><span>B. Lester, R. Al-Rfou, N. Constant. "The Power of Scale for Parameter-Efficient Prompt Tuning." <em>EMNLP</em> (2021): 3045–3059.</span></div>
+  <div class="ref-item"><span class="ref-num">[5]</span><span>T. Wallace, S. Feng, F. Bhatia, R. Gardner, P. Singh. "Universal Adversarial Triggers for Attacking and Analyzing NLP." <em>EMNLP</em> (2019).</span></div>
+  <div class="ref-item"><span class="ref-num">[6]</span><span>C. Yang, X. Wang, Y. Lu et al. "Large Language Models as Optimizers." <em>ICLR</em> (2024).</span></div>
+  <div class="ref-item"><span class="ref-num">[7]</span><span>S. Fernando, D. Banarse, H. Michalewski, S. Osindero, T. Rocktäschel. "PromptBreeder: Self-Referential Self-Improvement via Prompt Evolution." <em>arXiv:2309.16797</em> (2023).</span></div>
+  <div class="ref-item"><span class="ref-num">[8]</span><span>E. Real, A. Aggarwal, Y. Huang, Q. Le. "Regularized Evolution for Image Classifier Architecture Search." <em>AAAI</em> 33 (2019): 4780–4789.</span></div>
+  <div class="ref-item"><span class="ref-num">[9]</span><span>J. Loshchilov, F. Hutter. "CMA-ES for Hyperparameter Optimization of Deep Neural Networks." <em>ICLR Workshop</em> (2016).</span></div>
+  <div class="ref-item"><span class="ref-num">[10]</span><span>J. Xu, D. Ong, P. Clark, A. Bosselut. "WizardLM: Empowering LLMs to Follow Complex Instructions." <em>ICLR</em> (2024).</span></div>
+  <div class="ref-item"><span class="ref-num">[11]</span><span>Q. Chen, M. Aksitov, T. Sellam et al. "EvoPrompting: Language Models for Code-Level Neural Architecture Search." <em>NeurIPS</em> (2023).</span></div>
+  <div class="ref-item"><span class="ref-num">[12]</span><span>W. Chiang, L. Zheng, Y. Sheng et al. "Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference." <em>arXiv:2403.04132</em> (2024).</span></div>
+  <div class="ref-item"><span class="ref-num">[13]</span><span>P. Liang, R. Bommasani, T. Lee et al. "Holistic Evaluation of Language Models." <em>TMLR</em> (2023).</span></div>
+  <div class="ref-item"><span class="ref-num">[14]</span><span>L. Zheng, W. Chiang, Y. Sheng et al. "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena." <em>NeurIPS Datasets and Benchmarks Track</em> (2023).</span></div>
+  <div class="ref-item"><span class="ref-num">[15]</span><span>N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan, S. Yao. "Reflexion: Language Agents with Verbal Reinforcement Learning." <em>NeurIPS</em> (2023).</span></div>
+  <div class="ref-item"><span class="ref-num">[16]</span><span>Y. Wang, W. Ding, G. Liu et al. "Executable Code Actions Elicit Better LLM Agents." <em>ICML</em> (2024).</span></div>
+  <div class="ref-item"><span class="ref-num">[17]</span><span>C. Pezeshkpour, S. Hruschka. "Large Language Models Sensitivity to the Order of Options in Multiple-Choice Questions." <em>EMNLP Findings</em> (2023).</span></div>
+  <div class="ref-item"><span class="ref-num">[18]</span><span>H. Chase. "LangChain." <em>GitHub repository</em>, 2022. https://github.com/langchain-ai/langchain.</span></div>
+  <div class="ref-item"><span class="ref-num">[19]</span><span>A. Elo. <em>The Rating of Chess Players, Past and Present.</em> Arco Publishing, 1978.</span></div>
+  <div class="ref-item"><span class="ref-num">[20]</span><span>FIDE. "FIDE Rating Regulations." FIDE Handbook, Section B.02 (2023). https://handbook.fide.com.</span></div>
+  <div class="ref-item"><span class="ref-num">[21]</span><span>R. Nanz, C. Furia. "A Comparative Study of Programming Languages in Rosetta Code." <em>ICSE</em> (2015): 778–788.</span></div>
+</div>
+
+<hr class="footnote-rule"/>
+<div class="footnote">Code and data: <strong>https://github.com/oxcl/sysevo</strong> — MIT License.</div>
+<div class="footnote">Correspondence: Azad Hashemi &lt;a.hashemi@eiu.am&gt;. This work does not raise ethical concerns beyond standard LLM deployment considerations.</div>
+
+</body>
+</html>

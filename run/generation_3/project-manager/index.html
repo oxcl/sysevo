@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess - Project Manager</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+      background: #1e293b;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    h1 {
+      color: #38bdf8;
+      font-size: 2rem;
+    }
+    canvas {
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    #status {
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+    #metrics {
+      display: flex;
+      gap: 20px;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Chess</h1>
+    <canvas id="board"></canvas>
+    <div id="status">White to move</div>
+    <div id="metrics">
+      <span>AI: <span id="ai-time">0ms</span></span>
+      <span>Nodes: <span id="nodes">0</span></span>
+    </div>
+  </div>
+  <script type="module" src="/src/game.js"></script>
+</body>
+</html>

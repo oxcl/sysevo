@@ -1,0 +1,91 @@
+const W='w',B='b';
+const INIT=[
+  ['bR','bN','bB','bQ','bK','bB','bN','bR'],['bP','bP','bP','bP','bP','bP','bP','bP'],
+  [null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
+  [null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
+  ['wP','wP','wP','wP','wP','wP','wP','wP'],['wR','wN','wB','wQ','wK','wB','wN','wR']
+];
+
+export class ChessEngine{
+  constructor(){this.board=[];this.turn=W;this.cast={wK:1,wQ:1,bK:1,bQ:1};this.ep=null;this.hc=0;this.fn=1;this.hist=[];this.reset();}
+  reset(){this.board=INIT.map(r=>[...r]);this.turn=W;this.cast={wK:1,wQ:1,bK:1,bQ:1};this.ep=null;this.hc=0;this.fn=1;this.hist=[];}
+  co(p){return p?p[0]:null;}tp(p){return p?p[1]:null;}ok(r,c){return r>=0&&r<8&&c>=0&&c<8;}
+
+  findK(color){for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(this.board[r][c]===color+'K')return[r,c];return null;}
+
+  attacked(r,c,by){
+    for(let i=0;i<8;i++)for(let j=0;j<8;j++){const p=this.board[i][j];if(p&&this.co(p)===by&&this.canA(i,j,r,c))return true;}return false;
+  }
+
+  canA(fr,fc,tr,tc){
+    const p=this.board[fr][fc];if(!p)return false;
+    const t=this.tp(p),co=this.co(p),dr=tr-fr,dc=tc-fc,ar=Math.abs(dr),ac=Math.abs(dc);
+    if(t==='P')return dr===(co===W?-1:1)&&ac===1;
+    if(t==='N')return(ar===2&&ac===1)||(ar===1&&ac===2);
+    if(t==='B')return ar===ac&&ar>0&&this.clr(fr,fc,tr,tc);
+    if(t==='R')return(dr===0||dc===0)&&(ar+ac)>0&&this.clr(fr,fc,tr,tc);
+    if(t==='Q')return((ar===ac&&ar>0)||((dr===0||dc===0)&&(ar+ac)>0))&&this.clr(fr,fc,tr,tc);
+    if(t==='K')return ar<=1&&ac<=1&&(ar+ac)>0;return false;
+  }
+
+  clr(fr,fc,tr,tc){const sr=Math.sign(tr-fr),sc=Math.sign(tc-fc);let r=fr+sr,c=fc+sc;while(r!==tr||c!==tc){if(this.board[r][c])return false;r+=sr;c+=sc;}return true;}
+
+  inC(color){const k=this.findK(color);return k?this.attacked(k[0],k[1],color===W?B:W):false;}
+
+  pseudo(r,c){
+    const p=this.board[r][c];if(!p)return[];
+    const co=this.co(p),t=this.tp(p),opp=co===W?B:W,mv=[];
+    const add=(tr,tc,f={})=>{if(this.ok(tr,tc)&&(!this.board[tr][tc]||this.co(this.board[tr][tc])===opp))mv.push({from:[r,c],to:[tr,tc],...f});};
+    const sl=(dirs)=>{for(const[dr,dc]of dirs){let tr=r+dr,tc=c+dc;while(this.ok(tr,tc)){const tg=this.board[tr][tc];if(tg){if(this.co(tg)===opp)mv.push({from:[r,c],to:[tr,tc]});break;}mv.push({from:[r,c],to:[tr,tc]});tr+=dr;tc+=dc;}}};
+
+    switch(t){
+      case'P':{const d=co===W?-1:1,sr=co===W?6:1,pr=co===W?0:7,f=r+d;
+        if(this.ok(f,c)&&!this.board[f][c]){if(f===pr){for(const pp of['Q','R','B','N'])mv.push({from:[r,c],to:[f,c],promotion:pp});}else{mv.push({from:[r,c],to:[f,c]});if(r===sr&&this.ok(r+2*d,c)&&!this.board[r+2*d][c])mv.push({from:[r,c],to:[r+2*d,c],doublePush:1});}}
+        for(const dc of[-1,1]){const tr=r+d,tc=c+dc;if(!this.ok(tr,tc))continue;const tg=this.board[tr][tc];if(tg&&this.co(tg)===opp){if(tr===pr){for(const pp of['Q','R','B','N'])mv.push({from:[r,c],to:[tr,tc],promotion:pp});}else{mv.push({from:[r,c],to:[tr,tc]});}}if(this.ep&&tr===this.ep[0]&&tc===this.ep[1])mv.push({from:[r,c],to:[tr,tc],enPassant:1});}break;}
+      case'N':for(const[dr,dc]of[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]])add(r+dr,c+dc);break;
+      case'B':sl([[-1,-1],[-1,1],[1,-1],[1,1]]);break;
+      case'R':sl([[-1,0],[1,0],[0,-1],[0,1]]);break;
+      case'Q':sl([[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]);break;
+      case'K':{for(const[dr,dc]of[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]])add(r+dr,c+dc);
+        if(this.cast[co+'K']&&!this.board[r][5]&&!this.board[r][6]&&this.board[r][7]===co+'R'&&!this.inC(co)&&!this.attacked(r,5,opp)&&!this.attacked(r,6,opp))mv.push({from:[r,c],to:[r,6],castling:'K'});
+        if(this.cast[co+'Q']&&!this.board[r][3]&&!this.board[r][2]&&!this.board[r][1]&&this.board[r][0]===co+'R'&&!this.inC(co)&&!this.attacked(r,3,opp)&&!this.attacked(r,2,opp))mv.push({from:[r,c],to:[r,2],castling:'Q'});break;}
+    }
+    return mv;
+  }
+
+  legal(r,c){const p=this.board[r][c];if(!p||this.co(p)!==this.turn)return[];const co=this.co(p);return this.pseudo(r,c).filter(m=>{const s=this.doMove(m);const ok=!this.inC(co);this.undo(s);return ok;});}
+
+  allLegal(color){const sv=this.turn;this.turn=color;const mv=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(this.board[r][c]&&this.co(this.board[r][c])===color)mv.push(...this.legal(r,c));this.turn=sv;return mv;}
+
+  doMove(m){
+    const[fr,fc]=m.from,[tr,tc]=m.to,p=this.board[fr][fc],cap=this.board[tr][tc],co=this.co(p);
+    const s={m,cap,pc:{...this.cast},pe:this.ep,ph:this.hc};
+    this.board[tr][tc]=m.promotion?co+m.promotion:p;this.board[fr][fc]=null;
+    if(m.enPassant){const er=co===W?tr+1:tr-1;s.epc=this.board[er][tc];this.board[er][tc]=null;}
+    this.ep=m.doublePush?[(fr+tr)/2,fc]:null;
+    const t=this.tp(p);
+    if(t==='K'){this.cast[co+'K']=0;this.cast[co+'Q']=0;}
+    if(t==='R'){if(fr===7&&fc===0)this.cast.wQ=0;if(fr===7&&fc===7)this.cast.wK=0;if(fr===0&&fc===0)this.cast.bQ=0;if(fr===0&&fc===7)this.cast.bK=0;}
+    if(tr===0&&tc===0)this.cast.bQ=0;if(tr===0&&tc===7)this.cast.bK=0;if(tr===7&&tc===0)this.cast.wQ=0;if(tr===7&&tc===7)this.cast.wK=0;
+    if(m.castling){const rf=m.castling==='K'?7:0,rt=m.castling==='K'?5:3;this.board[tr][rt]=this.board[tr][rf];this.board[tr][rf]=null;}
+    this.hc=(t==='P'||cap||m.enPassant)?0:this.hc+1;if(co===B)this.fn++;this.turn=co===W?B:W;this.hist.push(s);return s;
+  }
+
+  undo(s){
+    const{m,cap,pc,pe,ph,epc}=s,[fr,fc]=m.from,[tr,tc]=m.to,p=this.board[tr][tc],co=this.co(p);
+    this.board[fr][fc]=m.promotion?co+'P':p;this.board[tr][tc]=cap||null;
+    if(m.enPassant){const er=co===W?tr+1:tr-1;if(this.ok(er,tc))this.board[er][tc]=epc||null;}
+    if(m.castling){const rf=m.castling==='K'?7:0,rt=m.castling==='K'?5:3;this.board[fr][rf]=this.board[fr][rt];this.board[fr][rt]=null;}
+    this.cast=pc;this.ep=pe;this.hc=ph;if(co===B)this.fn--;this.turn=co;this.hist.pop();
+  }
+
+  isCheckmate(){return this.inC(this.turn)&&this.allLegal(this.turn).length===0;}
+  isStalemate(){return!this.inC(this.turn)&&this.allLegal(this.turn).length===0;}
+  isDraw(){if(this.hc>=100)return true;const ps=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(this.board[r][c])ps.push(this.board[r][c]);if(ps.length===2)return true;if(ps.length===3&&ps.some(p=>['B','N'].includes(this.tp(p))))return true;return false;}
+
+  evaluate(){
+    const v={P:100,N:320,B:330,R:500,Q:900,K:20000};
+    const pst={P:[0,0,0,0,0,0,0,0,50,50,50,50,50,50,50,0,10,10,20,30,30,20,10,10,5,5,10,25,25,10,5,5,0,0,0,20,20,0,0,0,5,-5,-10,0,0,-10,-5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],N:[-50,-40,-30,-30,-30,-30,-40,-50,-40,-20,0,5,5,0,-20,-40,-30,5,10,15,15,10,5,-30,-30,0,15,20,20,15,0,-30,-30,5,15,20,20,15,5,-30,-30,0,10,15,15,10,0,-30,-30,5,5,10,10,5,5,-30,-40,-20,-30,-30,-30,-30,-20,-40,-50,-40,-30,-30,-30,-30,-40,-50],B:[-20,-10,-10,-10,-10,-10,-10,-20,-10,5,0,0,0,0,5,-10,-10,10,10,10,10,10,10,-10,0,5,10,10,10,10,5,0,-5,0,10,10,10,10,0,-5,-10,0,5,10,10,10,5,0,-10,-10,0,0,0,0,0,0,-10,-20,-10,-10,-10,-10,-10,-10,-20],R:[0,0,0,5,5,0,0,0,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,0,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0],Q:[-20,-10,-10,-5,-5,-10,-10,-20,-10,0,5,0,0,0,0,-10,-10,5,5,5,5,5,5,-10,0,0,5,5,5,5,0,0,-5,0,5,5,5,5,0,-5,-10,0,5,5,5,5,0,-10,-10,0,5,5,5,5,0,-10,-20,-10,-10,-5,-5,-10,-10,-20],K:[20,30,10,0,0,10,30,20,20,20,0,0,0,0,20,20,20,-10,-20,-20,-20,-20,-10,20,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30]};
+    let s=0;for(let r=0;r<8;r++)for(let c=0;c<8;c++){const p=this.board[r][c];if(!p)continue;const co=this.co(p),t=this.tp(p),idx=co===W?r*8+c:(7-r)*8+c;s+=co===W?(v[t]||0)+(pst[t]?pst[t][idx]:0):-(v[t]||0)-(pst[t]?pst[t][idx]:0);}return s;
+  }
+}

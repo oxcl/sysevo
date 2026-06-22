@@ -1,0 +1,14 @@
+{
+  "name": "chess-baseline",
+  "version": "1.0.0",
+  "description": "Reference chess implementation - fast, correct, clean",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

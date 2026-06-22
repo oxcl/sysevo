@@ -1,35 +1,75 @@
-# Sysevo
+# Sysevo — System Prompt Evolution Framework
 
-**System Prompt Evolution** — a framework for benchmarking AI coding agents across different system prompt strategies.
+**An empirical framework for benchmarking and evolving AI coding agent system prompts using context engineering, prompt breeding, and parallel evaluation.**
 
-Sysevo runs the same coding task against multiple system prompt variants in parallel, then compares outputs to understand which prompting strategies produce better code.
+Developed in partnership with [Eurasia International University of Armenia](https://eua.am/) as part of applied research in AI agent orchestration and LLM prompt optimization.
 
-## The Problem
+---
 
-System prompts shape how an AI agent approaches a task — its planning style, attention to quality, error handling, and overall output. But prompt engineering is mostly trial and error. There's no systematic way to compare strategies.
+## Overview
 
-Sysevo makes this empirical. Define your prompts, define your tasks, run them all in parallel, and let the results speak.
+Sysevo is a Python-based framework that systematically benchmarks AI coding agents across different **system prompt strategies** — then evolves better prompts through an LLM-driven breeding process inspired by genetic algorithms.
 
-## How It Works
+The core insight: **system prompts are the most impactful lever in context engineering**, yet most teams optimize them through intuition and trial-and-error. Sysevo replaces that with empirical, reproducible experimentation.
+
+Built with [LangChain](https://python.langchain.com/) and [LangGraph](https://python.langchain.com/docs/langgraph), Sysevo runs the same coding task against multiple system prompt variants in parallel, then compares outputs to determine which prompting strategies produce superior code.
+
+---
+
+## Key Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **System Prompting** | Structured system prompts that define agent persona, workflow, constraints, and quality standards |
+| **Context Engineering** | Designing the full context window — system prompt + tools + task description — to maximize agent performance |
+| **Prompt Breeding** | LLM-driven crossover and mutation of two parent prompts into a new child prompt, combining complementary strategies |
+| **Generational Evolution** | Iterative refinement across generations — best-performing prompts survive, underperformers are retired |
+| **Parallel Benchmarking** | Running all prompt variants simultaneously against identical tasks for controlled comparison |
+
+---
+
+## Architecture
 
 ```
-prompts/           → System prompt variants, organized by generation
-tasks/             → Coding tasks to evaluate against
-scripts/           → Orchestration (LangChain agents, parallel execution)
-run/               → Agent outputs, organized by generation and agent name
-config.json        → Model and concurrency settings
+sysevo/
+├── prompts/                # System prompt variants, organized by generation
+│   ├── generation_0/       # Initial seed prompts (12 strategies)
+│   ├── generation_1/       # First-generation bred prompts
+│   ├── generation_2/       # Second-generation refinements
+│   ├── generation_3/       # Third-generation refinements
+│   ├── breeder.md          # Meta-prompt for the LLM breeder agent
+│   └── breeding_pairs.txt  # Curated parent pairings for batch breeding
+├── tasks/                  # Coding tasks used as evaluation benchmarks
+├── scripts/                # Orchestration layer
+│   ├── agent.py            # LangChain agent setup, tools, model loading
+│   ├── run.py              # Single agent execution
+│   ├── run_task.py         # Parallel execution of all agents on a task
+│   ├── breed.py            # Single prompt breeding via LLM
+│   └── breed_batch.py      # Batch breeding with interactive mode
+├── run/                    # Agent outputs, organized by generation and agent
+├── config.json             # Model provider and concurrency settings
+└── requirements.txt        # Python dependencies
 ```
 
-1. **Define prompts** in `prompts/generation_0/` — each file is a different system prompt strategy
-2. **Define tasks** in `tasks/` — markdown files describing what to build
-3. **Run** `./scripts/run_task.sh 0 <task-name>` to execute all prompts against a task in parallel
-4. **Compare** outputs in `run/generation_0/<agent-name>/`
+---
 
-## Prompt Strategies (Generation 0)
+## Tech Stack
 
-| Prompt | Strategy |
-|--------|----------|
-| `baseline` | Minimal instructions — just "you are an expert developer" |
+- **Language:** Python 3.10+
+- **Agent Framework:** LangChain + LangGraph
+- **Supported LLM Providers:** OpenAI (GPT-4o), Anthropic (Claude), Google (Gemini) — extensible to any LangChain-compatible provider
+- **Parallelization:** Python `ProcessPoolExecutor` with configurable concurrency
+- **Tools:** File system tools (bash, read, write, edit, list) — agents operate in a full coding environment
+
+---
+
+## Prompt Strategies
+
+Sysevo benchmarks 12 distinct system prompt strategies, each encoding a different approach to agent behavior:
+
+| Strategy | Approach |
+|----------|----------|
+| `baseline` | Minimal instructions — "you are an expert developer" |
 | `tdd` | Test-driven development enforced — tests before implementation |
 | `todoist` | Task management via `plan.md` — structured step-by-step execution |
 | `flamboyent` | Excellence-driven — "make the user wow your work" |
@@ -42,16 +82,42 @@ config.json        → Model and concurrency settings
 | `clean-after-yourself` | Code quality focused — mandatory review and cleanup cycles |
 | `personality` | Senior engineer persona — pragmatic, rigorous, systematic |
 
-## Tasks
+---
 
-| Task | Description |
-|------|-------------|
-| `001-tictactoe` | Simple tic-tac-toe in a single HTML file |
-| `002-chess` | Production-ready chess game with AI opponent, Canvas API, and animations |
+## Breeding & Evolution
+
+The breeding mechanism uses an LLM to combine two parent system prompts into a novel child prompt:
+
+```bash
+# Breed two prompts into a new one
+./scripts/breed.sh 0 tdd simplicity tdd-simplicity
+
+# Batch breed from curated pairs
+python3 ./scripts/breed_batch.py 0 ./prompts/breeding_pairs.txt
+
+# Interactive breeding
+python3 ./scripts/breed_batch.py 0 --interactive
+```
+
+The breeder agent applies strategies like hybridization, amplification, inversion, extraction, and novel mutation — producing prompts that are genuinely new, not just concatenations of their parents.
+
+---
+
+## Running Benchmarks
+
+```bash
+# Run all 12 agents against a task in parallel
+./scripts/run_task.sh 0 002-chess
+
+# Run a single agent
+./scripts/run.sh 0 baseline 002-chess
+```
+
+Outputs appear in `run/generation_<n>/<agent-name>/` as complete project directories with full source code.
+
+---
 
 ## Configuration
-
-Edit `config.json`:
 
 ```json
 {
@@ -60,58 +126,30 @@ Edit `config.json`:
 }
 ```
 
-- `model` — LangChain model string in `"provider:model"` format (e.g., `"openai:gpt-4o"`, `"anthropic:claude-sonnet-4-6"`, `"google_genai:gemini-2.5-flash"`)
-- `concurrency` — Number of parallel agents
+Supports any LangChain-compatible model string: `"openai:gpt-4o"`, `"anthropic:claude-sonnet-4-6"`, `"google_genai:gemini-2.5-flash"`.
 
-## Requirements
+---
 
-- Python 3.10+
-- [LangChain](https://python.langchain.com/) — agent framework
-- Provider packages: `langchain-openai`, `langchain-anthropic`, `langchain-google-genai` (install the ones you need)
-- API keys set as environment variables (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.)
+## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+Set provider API keys as environment variables (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`).
 
-```bash
-# Run all prompts against a specific task
-./scripts/run_task.sh 0 002-chess
+---
 
-# Run a single prompt against a task
-./scripts/run.sh 0 baseline 002-chess
+## Research Context
 
-# Breed two prompts into a new one
-./scripts/breed.sh 0 tdd simplicity tdd-simplicity
+This project was developed as part of a collaboration with **Eurasia International University of Armenia**, investigating systematic approaches to LLM prompt optimization and AI agent orchestration. The framework demonstrates that prompt engineering can be treated as an empirical, evolutionary process rather than a manual craft — with direct applications in:
 
-# Batch breed from a pairs file
-python3 ./scripts/breed_batch.py 0 ./prompts/breeding_pairs.txt
-```
+- **AI agent development** — optimizing system prompts for coding assistants
+- **LLM evaluation** — controlled benchmarking of prompt effectiveness
+- **Context engineering research** — understanding how prompt structure influences agent behavior
+- **MLOps for prompts** — version-controlled, reproducible prompt management
 
-Outputs appear in `run/generation_<n>/<agent-name>/` as complete project directories.
-
-## Breeding
-
-The breeder agent takes two parent system prompts and uses an LLM to combine and mutate them into a new child prompt. See `prompts/breeding_pairs.txt` for example pairings.
-
-```bash
-# Interactive breeding
-python3 ./scripts/breed_batch.py 0 --interactive
-
-# Single pair
-./scripts/breed.sh 0 flamboyent prove-yourself competitive-excellence
-```
-
-## Evolution
-
-The framework is designed for iteration across generations:
-
-- **Generation 0** — Initial prompt variants, baseline comparison
-- **Generation 1+** — Refined prompts based on what worked, retired strategies that didn't
-
-Each generation can introduce new prompts, retire underperformers, and evolve the best strategies based on empirical results.
+---
 
 ## License
 

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess - Clean</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+      background: #0f0f23;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    h1 {
+      color: #00ff41;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+    }
+    canvas {
+      border: 2px solid #00ff41;
+      border-radius: 4px;
+    }
+    #status {
+      color: #00ff41;
+      font-size: 0.9rem;
+      font-family: 'SF Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>CHESS</h1>
+    <canvas id="board"></canvas>
+    <div id="status">White to move</div>
+  </div>
+  <script type="module" src="/src/game.js"></script>
+</body>
+</html>
